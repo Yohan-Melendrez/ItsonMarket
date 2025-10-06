@@ -5,7 +5,7 @@ const chatRepo = new ChatRepository();
 
 async function runTests() {
   try {
-    console.log("🧠 Iniciando pruebas del ChatRepository...");
+    console.log(" Iniciando pruebas del ChatRepository...");
     await connectDB();
 
     const nuevoChat = await chatRepo.insert({
