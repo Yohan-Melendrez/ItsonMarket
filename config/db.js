@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 
 async function connectDB() {
   try {
-    const mongoURI = process.env.MONGO_URI;
+    const mongoURI = "mongodb://localhost:27017/itsonMarket"
     await mongoose.connect(mongoURI);
     console.log(" Conectado a MongoDB");
   } catch (error) {

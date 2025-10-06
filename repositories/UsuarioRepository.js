@@ -36,4 +36,4 @@ class UsuarioRepository {
     }
 }
 
-module.exports = UsuarioDAO;
+module.exports = UsuarioRepository;
