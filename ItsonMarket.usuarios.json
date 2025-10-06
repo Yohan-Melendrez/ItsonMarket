@@ -1,0 +1,16 @@
+[{
+  "_id": {
+    "$oid": "68e1fbbddd91550a67f42151"
+  },
+  "itson_id": "2",
+  "nombre": "maria",
+  "correo_institucional": "maria@potros.itson.edu.mx",
+  "carrera": "ISW",
+  "telefono": "64422535235",
+  "reputacion": {
+    "puntuacion_promedio": 2,
+    "total_transacciones": 2
+  },
+  "foto": "",
+  "__v": 0
+}]
