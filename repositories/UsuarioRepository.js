@@ -1,29 +1,39 @@
-const UsuarioDAO = require('../dao/UsuarioDAO');
+const { UsuarioModel } = require('../models/Usuario');
 
 class UsuarioRepository {
-  constructor() {
-    this.dao = new UsuarioDAO();
-  }
 
-  async crearUsuario(usuarioData) {
-    return this.dao.insert(usuarioData);
-  }
+    async insert(usuarioData) {
+        const usuarioNuevo = new UsuarioModel(usuarioData);
+        return usuarioNuevo.save();
+    }
 
-  async obtenerUsuarios() {
-    return this.dao.findAll();
-  }
+    async findAll() {
+        return UsuarioModel.find({});
+    }
 
-  async buscarPorItsonId(itson_id) {
-    return this.dao.findByItsonId(itson_id);
-  }
+    async findByName(nombre) {
+        return UsuarioModel.findOne({ nombre: nombre });
+    }
 
-  async actualizarUsuario(itson_id, datosActualizados) {
-    return this.dao.updateByItsonId(itson_id, datosActualizados);
-  }
+    async findByItsonId(itson_id) {
+        return UsuarioModel.findOne({ itson_id: itson_id });
+    }
 
-  async eliminarUsuario(itson_id) {
-    return this.dao.deleteByItsonId(itson_id);
-  }
+    async update(id, updateData) {
+        return UsuarioModel.findByIdAndUpdate(id, updateData, { new: true });
+    }
+
+    async updateByItsonId(itson_id, updateData) {
+        return UsuarioModel.findOneAndUpdate({ itson_id: itson_id }, updateData, { new: true });
+    }
+
+    async delete(id) {
+        return UsuarioModel.findByIdAndDelete(id);
+    }
+
+    async deleteByItsonId(itson_id) {
+        return UsuarioModel.findOneAndDelete({ itson_id: itson_id });
+    }
 }
 
-module.exports = UsuarioRepository;
+module.exports = UsuarioDAO;
