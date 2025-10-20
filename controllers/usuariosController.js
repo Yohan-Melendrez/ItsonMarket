@@ -7,7 +7,7 @@ const repo = new UsuarioRepository();
  */
 exports.obtenerUsuarios = async (req, res) => {
   try {
-    const usuarios = await repo.obtenerUsuarios();
+    const usuarios = await repo.findAll();
     if (!usuarios || usuarios.length === 0)
       return res.status(404).json({ mensaje: "No hay usuarios registrados" });
 
@@ -35,7 +35,7 @@ exports.crearUsuario = async (req, res) => {
       return res.status(400).json({ error: "El correo debe ser institucional (@itson.edu.mx)" });
     }
 
-    const nuevo = await repo.crearUsuario(req.body);
+    const nuevo = await repo.insert(req.body);
     res.status(201).json({ mensaje: "Usuario creado correctamente", usuario: nuevo });
   } catch (err) {
     res.status(400).json({ error: "No se pudo crear el usuario", detalle: err.message });
@@ -48,7 +48,7 @@ exports.crearUsuario = async (req, res) => {
  */
 exports.obtenerUsuarioPorId = async (req, res) => {
   try {
-    const usuario = await repo.buscarPorItsonId(req.params.id);
+    const usuario = await repo.findByItsonId(req.params.id);
     if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
 
     res.status(200).json(usuario);
@@ -63,7 +63,7 @@ exports.obtenerUsuarioPorId = async (req, res) => {
  */
 exports.actualizarUsuario = async (req, res) => {
   try {
-    const actualizado = await repo.actualizarUsuario(req.params.id, req.body);
+    const actualizado = await repo.updateByItsonId(req.params.id, req.body);
     if (!actualizado) return res.status(404).json({ error: "Usuario no encontrado para actualizar" });
 
     res.status(200).json({ mensaje: "Usuario actualizado correctamente", usuario: actualizado });
@@ -78,7 +78,7 @@ exports.actualizarUsuario = async (req, res) => {
  */
 exports.eliminarUsuario = async (req, res) => {
   try {
-    const eliminado = await repo.eliminarUsuario(req.params.id);
+    const eliminado = await repo.deleteByItsonId(req.params.id);
     if (!eliminado) return res.status(404).json({ error: "Usuario no encontrado para eliminar" });
 
     res.status(200).json({ mensaje: "Usuario eliminado correctamente" });
