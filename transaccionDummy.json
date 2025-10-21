@@ -1,0 +1,114 @@
+[
+  {
+    "id": "1",
+    "comprador_id": "507f1f77bcf86cd799439021",
+    "vendedor_id": "507f1f77bcf86cd799439011",
+    "publicacion_id": "1",
+    "tipo_publicacion": "producto",
+    "fecha_transaccion": "2024-01-16T14:30:00.000Z",
+    "calificaciones": {
+      "comprador_a_vendedor": {
+        "puntuacion": 5,
+        "comentario": "Excelente vendedor, producto en perfecto estado",
+        "fecha": "2024-01-17T10:00:00.000Z"
+      },
+      "vendedor_a_comprador": {
+        "puntuacion": 4,
+        "comentario": "Pago rápido y buena comunicación",
+        "fecha": "2024-01-17T10:05:00.000Z"
+      }
+    },
+    "estado": "completada",
+    "monto": 1200
+  },
+  {
+    "id": "2",
+    "comprador_id": "507f1f77bcf86cd799439022",
+    "vendedor_id": "507f1f77bcf86cd799439012",
+    "publicacion_id": "2",
+    "tipo_publicacion": "servicio",
+    "fecha_transaccion": "2024-01-13T16:45:00.000Z",
+    "calificaciones": {
+      "comprador_a_vendedor": {
+        "puntuacion": 4,
+        "comentario": "Buen profesor, muy paciente",
+        "fecha": "2024-01-15T12:30:00.000Z"
+      },
+      "vendedor_a_comprador": {
+        "puntuacion": 5,
+        "comentario": "Alumno muy aplicado",
+        "fecha": "2024-01-15T12:35:00.000Z"
+      }
+    },
+    "estado": "completada",
+    "monto": 25
+  },
+  {
+    "id": "3",
+    "comprador_id": "507f1f77bcf86cd799439023",
+    "vendedor_id": "507f1f77bcf86cd799439013",
+    "publicacion_id": "3",
+    "tipo_publicacion": "producto",
+    "fecha_transaccion": "2024-01-19T11:20:00.000Z",
+    "calificaciones": {
+      "comprador_a_vendedor": {
+        "puntuacion": 3,
+        "comentario": "Producto bien pero entrega un poco tardía",
+        "fecha": "2024-01-20T09:15:00.000Z"
+      },
+      "vendedor_a_comprador": null
+    },
+    "estado": "completada",
+    "monto": 850
+  },
+  {
+    "id": "4",
+    "comprador_id": "507f1f77bcf86cd799439024",
+    "vendedor_id": "507f1f77bcf86cd799439014",
+    "publicacion_id": "4",
+    "tipo_publicacion": "servicio",
+    "fecha_transaccion": "2024-01-23T08:00:00.000Z",
+    "calificaciones": {
+      "comprador_a_vendedor": null,
+      "vendedor_a_comprador": null
+    },
+    "estado": "pendiente",
+    "monto": 50
+  },
+  {
+    "id": "5",
+    "comprador_id": "507f1f77bcf86cd799439025",
+    "vendedor_id": "507f1f77bcf86cd799439015",
+    "publicacion_id": "5",
+    "tipo_publicacion": "producto",
+    "fecha_transaccion": "2024-01-24T15:30:00.000Z",
+    "calificaciones": {
+      "comprador_a_vendedor": null,
+      "vendedor_a_comprador": null
+    },
+    "estado": "cancelada",
+    "monto": 150
+  },
+  {
+    "id": "6",
+    "comprador_id": "507f1f77bcf86cd799439026",
+    "vendedor_id": "507f1f77bcf86cd799439011",
+    "publicacion_id": "1",
+    "tipo_publicacion": "producto",
+    "fecha_transaccion": "2024-01-25T10:00:00.000Z",
+    "calificaciones": {
+      "comprador_a_vendedor": {
+        "puntuacion": 5,
+        "comentario": "Segunda compra con este vendedor, todo perfecto",
+        "fecha": "2024-01-26T14:20:00.000Z"
+      },
+      "vendedor_a_comprador": {
+        "puntuacion": 5,
+        "comentario": "Cliente recurrente, muy confiable",
+        "fecha": "2024-01-26T14:25:00.000Z"
+      }
+    },
+    "estado": "completada",
+    "monto": 1200
+  }
+]
