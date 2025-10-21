@@ -1,0 +1,24 @@
+{
+  "id": "1",
+  "tipo_publicacion": "producto",
+  "vendedor_id": "507f1f77bcf86cd799439011",
+  "titulo": "Laptop Gaming ASUS ROG",
+  "descripcion": "Laptop para gaming en perfecto estado...",
+  "categoria": "Tecnología",
+  "precio": 1200,
+  "estado": "disponible",
+  "visible": true,
+  "vistas": 45,
+  "fecha_publicacion": "2024-01-15T10:30:00.000Z",
+  "fecha_actualizacion": "2024-01-15T10:30:00.000Z",
+  "detalles": {
+    "marca": "ASUS",
+    "edicion": "ROG Strix G15",
+    "imagenes": ["laptop1.jpg", "laptop2.jpg"],
+    "tarifa": null,
+    "duracion": null,
+    "unidad_tarifa": null,
+    "modalidad": null,
+    "experiencia": null
+  }
+}

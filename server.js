@@ -12,8 +12,6 @@ app.use(express.json());
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/publicaciones', publicacionRoutes);
 
-// Conexión a Mongo
-connectDB();
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
