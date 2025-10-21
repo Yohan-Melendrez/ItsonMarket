@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../api/usuariosController');
+const controller = require('./controllers/usuariosController');
 
 /**
  * @route GET /api/usuarios

@@ -1,0 +1,143 @@
+[
+  {
+    "id": "1",
+    "participantes": ["507f1f77bcf86cd799439011", "507f1f77bcf86cd799439012"],
+    "publicacion_id": "1",
+    "fecha_creacion": "2024-01-15T11:30:00.000Z",
+    "ultima_actualizacion": "2024-01-15T14:45:00.000Z",
+    "estado": "activo",
+    "mensajes": [
+      {
+        "remitente_id": "507f1f77bcf86cd799439011",
+        "contenido": "Hola, me interesa la laptop que publicaste",
+        "fecha_envio": "2024-01-15T11:30:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      },
+      {
+        "remitente_id": "507f1f77bcf86cd799439012",
+        "contenido": "¡Hola! Claro, está en perfecto estado. ¿Te gustaría verla?",
+        "fecha_envio": "2024-01-15T11:32:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      },
+      {
+        "remitente_id": "507f1f77bcf86cd799439011",
+        "contenido": "Sí, ¿podría verla hoy en la tarde?",
+        "fecha_envio": "2024-01-15T14:45:00.000Z",
+        "leido": false,
+        "tipo": "texto"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "participantes": ["507f1f77bcf86cd799439013", "507f1f77bcf86cd799439014"],
+    "publicacion_id": "2",
+    "fecha_creacion": "2024-01-16T09:15:00.000Z",
+    "ultima_actualizacion": "2024-01-16T10:20:00.000Z",
+    "estado": "activo",
+    "mensajes": [
+      {
+        "remitente_id": "507f1f77bcf86cd799439013",
+        "contenido": "Buenos días, quisiera información sobre las clases de guitarra",
+        "fecha_envio": "2024-01-16T09:15:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      },
+      {
+        "remitente_id": "507f1f77bcf86cd799439014",
+        "contenido": "Hola, con gusto. ¿Qué nivel tienes?",
+        "fecha_envio": "2024-01-16T09:18:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      },
+      {
+        "remitente_id": "507f1f77bcf86cd799439013",
+        "contenido": "Soy principiante, nunca he tocado guitarra",
+        "fecha_envio": "2024-01-16T10:20:00.000Z",
+        "leido": false,
+        "tipo": "texto"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "participantes": ["507f1f77bcf86cd799439015", "507f1f77bcf86cd799439011"],
+    "publicacion_id": "3",
+    "fecha_creacion": "2024-01-18T16:30:00.000Z",
+    "ultima_actualizacion": "2024-01-18T17:45:00.000Z",
+    "estado": "cerrado",
+    "mensajes": [
+      {
+        "remitente_id": "507f1f77bcf86cd799439015",
+        "contenido": "¿El iPhone todavía está disponible?",
+        "fecha_envio": "2024-01-18T16:30:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      },
+      {
+        "remitente_id": "507f1f77bcf86cd799439011",
+        "contenido": "Sí, todavía está disponible. ¿Te interesa?",
+        "fecha_envio": "2024-01-18T16:35:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      },
+      {
+        "remitente_id": "507f1f77bcf86cd799439015",
+        "contenido": "Perfecto, lo compro. ¿Dónde nos vemos?",
+        "fecha_envio": "2024-01-18T17:45:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "participantes": ["507f1f77bcf86cd799439012", "507f1f77bcf86cd799439013"],
+    "publicacion_id": "4",
+    "fecha_creacion": "2024-01-20T13:00:00.000Z",
+    "ultima_actualizacion": "2024-01-20T13:00:00.000Z",
+    "estado": "activo",
+    "mensajes": [
+      {
+        "remitente_id": "507f1f77bcf86cd799439012",
+        "contenido": "Hola, necesito un diseño para mi emprendimiento",
+        "fecha_envio": "2024-01-20T13:00:00.000Z",
+        "leido": false,
+        "tipo": "texto"
+      }
+    ]
+  },
+  {
+    "id": "5",
+    "participantes": ["507f1f77bcf86cd799439014", "507f1f77bcf86cd799439015"],
+    "publicacion_id": "5",
+    "fecha_creacion": "2024-01-22T15:20:00.000Z",
+    "ultima_actualizacion": "2024-01-22T16:10:00.000Z",
+    "estado": "activo",
+    "mensajes": [
+      {
+        "remitente_id": "507f1f77bcf86cd799439014",
+        "contenido": "¿Los libros de programación incluyen ejercicios?",
+        "fecha_envio": "2024-01-22T15:20:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      },
+      {
+        "remitente_id": "507f1f77bcf86cd799439015",
+        "contenido": "Sí, la mayoría incluye ejercicios prácticos y ejemplos",
+        "fecha_envio": "2024-01-22T15:25:00.000Z",
+        "leido": true,
+        "tipo": "texto"
+      },
+      {
+        "remitente_id": "507f1f77bcf86cd799439014",
+        "contenido": "👍 perfecto, me interesan",
+        "fecha_envio": "2024-01-22T16:10:00.000Z",
+        "leido": false,
+        "tipo": "texto"
+      }
+    ]
+  }
+]

@@ -23,4 +23,4 @@ class PublicacionRepository {
   }
 }
 
-module.exports = { PublicacionRepository };
+module.exports =  PublicacionRepository ;
