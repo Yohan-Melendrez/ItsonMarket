@@ -1,34 +1,44 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../api/usuariosController');
+const controller = require('../controllers/usuariosController');
+const authMiddleware = require('../middleware/auth');
+const { handleValidationErrors } = require('../middleware/validation');
+const { crearUsuarioValidator, actualizarUsuarioValidator } = require('../validators/usuarioValidator');
+
+router.use(authMiddleware);
 
 /**
  * @route GET /api/usuarios
  * @desc Obtener todos los usuarios
+ * @access Private
  */
 router.get('/', controller.obtenerUsuarios);
 
 /**
  * @route POST /api/usuarios
  * @desc Crear un nuevo usuario
+ * @access Private
  */
-router.post('/', controller.crearUsuario);
+router.post('/', crearUsuarioValidator, handleValidationErrors, controller.crearUsuario);
 
 /**
  * @route GET /api/usuarios/:id
  * @desc Obtener un usuario por ITSON ID
+ * @access Private
  */
 router.get('/:id', controller.obtenerUsuarioPorId);
 
 /**
  * @route PUT /api/usuarios/:id
  * @desc Actualizar un usuario por ITSON ID
+ * @access Private
  */
-router.put('/:id', controller.actualizarUsuario);
+router.put('/:id', actualizarUsuarioValidator, handleValidationErrors, controller.actualizarUsuario);
 
 /**
  * @route DELETE /api/usuarios/:id
  * @desc Eliminar un usuario por ITSON ID
+ * @access Private
  */
 router.delete('/:id', controller.eliminarUsuario);
 
