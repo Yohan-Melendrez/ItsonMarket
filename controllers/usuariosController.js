@@ -9,7 +9,7 @@ const repo = new UsuarioRepository();
 exports.obtenerUsuarios = async (req, res, next) => {
   try {
     console.log('Obteniendo lista de usuarios...');
-    const usuarios = await repo.obtenerUsuarios();
+    const usuarios = await repo.findAll();
     
     if (!usuarios || usuarios.length === 0) {
       return res.status(404).json({ 
@@ -46,7 +46,7 @@ exports.crearUsuario = async (req, res, next) => {
       });
     }
 
-    const usuarioExistente = await repo.buscarPorItsonId(itson_id);
+    const usuarioExistente = await repo.findByItsonId(itson_id);
     if (usuarioExistente) {
       return res.status(409).json({
         error: "Usuario ya existe",
@@ -54,7 +54,7 @@ exports.crearUsuario = async (req, res, next) => {
       });
     }
 
-    const nuevoUsuario = await repo.crearUsuario(req.body);
+    const nuevoUsuario = await repo.insert(req.body);
     
     res.status(201).json({
       mensaje: "Usuario creado correctamente",
@@ -75,7 +75,7 @@ exports.obtenerUsuarioPorId = async (req, res, next) => {
     const { id } = req.params;
     console.log(`Buscando usuario con ITSON ID: ${id}`);
     
-    const usuario = await repo.buscarPorItsonId(id);
+    const usuario = await repo.findByItsonId(id);
     
     if (!usuario) {
       return res.status(404).json({
@@ -103,7 +103,7 @@ exports.actualizarUsuario = async (req, res, next) => {
     const { id } = req.params;
     console.log(`Actualizando usuario con ITSON ID: ${id}`, req.body);
     
-    const usuarioExistente = await repo.buscarPorItsonId(id);
+    const usuarioExistente = await repo.findByItsonId(id);
     if (!usuarioExistente) {
       return res.status(404).json({
         error: "Usuario no encontrado",
@@ -111,7 +111,7 @@ exports.actualizarUsuario = async (req, res, next) => {
       });
     }
 
-    const usuarioActualizado = await repo.actualizarUsuario(id, req.body);
+    const usuarioActualizado = await repo.updateByItsonId(id, req.body);
     
     res.status(200).json({
       mensaje: "Usuario actualizado correctamente",
@@ -132,7 +132,7 @@ exports.eliminarUsuario = async (req, res, next) => {
     const { id } = req.params;
     console.log(`Eliminando usuario con ITSON ID: ${id}`);
     
-    const usuarioExistente = await repo.buscarPorItsonId(id);
+    const usuarioExistente = await repo.findByItsonId(id);
     if (!usuarioExistente) {
       return res.status(404).json({
         error: "Usuario no encontrado",
@@ -140,7 +140,7 @@ exports.eliminarUsuario = async (req, res, next) => {
       });
     }
 
-    const resultado = await repo.eliminarUsuario(id);
+    const resultado = await repo.deleteByItsonId(id);
     
     res.status(200).json({
       mensaje: "Usuario eliminado correctamente",

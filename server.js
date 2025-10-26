@@ -16,6 +16,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/publicaciones', publicacionRoutes);
 app.use(errorHandler);
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'Servicio funcionando',
+    timestamp: new Date().toISOString()
+  });
+});
 // Conexión a Mongo
 connectDB();
 

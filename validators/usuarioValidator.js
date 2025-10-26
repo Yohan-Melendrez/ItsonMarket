@@ -4,7 +4,7 @@ const crearUsuarioValidator = [
   body('itson_id')
     .notEmpty()
     .withMessage('El ID es requerido')
-    .isLength({ min:4, max: 12 })
+    .isLength({ min:4, max: 20 })
     .withMessage('El ID debe tener los 5 ceros y los otros numeros')
     .isAlphanumeric()
     .withMessage('El ITSON ID solo puede contener numeros'),

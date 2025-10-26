@@ -29,7 +29,7 @@ router.post('/login', [
 
     const { itson_id, correo_institucional } = req.body;
 
-    const usuario = await repo.buscarPorItsonId(itson_id);
+    const usuario = await repo.findByItsonId(itson_id);
     
     if (!usuario) {
       return res.status(401).json({
