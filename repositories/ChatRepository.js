@@ -30,6 +30,32 @@ class ChatRepository {
   async delete(id) {
     return ChatModel.findByIdAndDelete(id);
   }
+
+  async agregarMensaje(chatId, mensajeData) {
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) return null;
+
+    chat.mensajes.push(mensajeData);
+    chat.ultima_actualizacion = Date.now();
+    await chat.save();
+    return chat;
+  }
+
+  async marcarMensajesLeidos(chatId, usuarioId) {
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) return null;
+
+    chat.mensajes.forEach((msg) => {
+      if (msg.remitente_id.toString() !== usuarioId.toString()) {
+        msg.leido = true;
+      }
+    });
+
+    chat.ultima_actualizacion = Date.now();
+    await chat.save();
+    return chat.mensajes;
+  }
+
 }
 
 module.exports = ChatRepository;
