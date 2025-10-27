@@ -7,9 +7,9 @@ class TransaccionRepository {
     return nuevaTransaccion.save();
   }
 
-  async findAll() {
-    return TransaccionModel.find({});
-  }
+  async findAll(filter = {}) {
+  return TransaccionModel.find(filter);
+}
 
   async findById(id) {
     return TransaccionModel.findById(id);
