@@ -4,7 +4,7 @@ const crearUsuarioValidator = [
   body('itson_id')
     .notEmpty()
     .withMessage('El ID es requerido')
-    .isLength({ min:4, max: 20 })
+    .isLength({ min: 4, max: 20 })
     .withMessage('El ID debe tener los 5 ceros y los otros numeros')
     .isAlphanumeric()
     .withMessage('El ITSON ID solo puede contener numeros'),
@@ -16,6 +16,14 @@ const crearUsuarioValidator = [
     .withMessage('El nombre debe tener entre 2 y 100 caracteres')
     .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
     .withMessage('El nombre solo puede contener letras y espacios'),
+
+  body('contrasena')
+    .notEmpty()
+    .withMessage('La contraseña es requerido')
+    .isLength({ min: 8 })
+    .withMessage('La contraseña debe tener minimo 8 digitos')
+    .isStrongPassword()
+    .withMessage('Debe ser una contraseña  válida'),
 
   body('correo_institucional')
     .notEmpty()

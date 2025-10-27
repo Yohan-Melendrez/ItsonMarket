@@ -14,9 +14,9 @@ router.post('/login', [
   body('itson_id')
     .notEmpty()
     .withMessage('ID del itson es requerido'),
-  body('correo_institucional')
-    .isEmail()
-    .withMessage('Correo institucional valido es requerido')
+  body('contrasena')
+    .isStrongPassword()
+    .withMessage('Contraseña valida es requerida')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -27,7 +27,7 @@ router.post('/login', [
       });
     }
 
-    const { itson_id, correo_institucional } = req.body;
+    const { itson_id, contrasena } = req.body;
 
     const usuario = await repo.findByItsonId(itson_id);
     
@@ -38,7 +38,7 @@ router.post('/login', [
       });
     }
 
-    if (usuario.correo_institucional !== correo_institucional) {
+    if (usuario.contrasena !== contrasena) {
       return res.status(401).json({
         error: 'Autenticación fallida',
         message: 'Credenciales incorrectas'
@@ -49,7 +49,7 @@ router.post('/login', [
       { 
         userId: usuario._id,
         itsonId: usuario.itson_id,
-        email: usuario.correo_institucional
+        contrasena: usuario.contrasena
       },
       process.env.JWT_SECRET || 'clave_secreta_itson',
       { expiresIn: '24h' }

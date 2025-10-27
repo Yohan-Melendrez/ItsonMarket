@@ -6,7 +6,8 @@ const UsuarioSchema = new mongoose.Schema({
     correo_institucional: String,
     carrera: String,
     telefono: String,
-
+    contrasena:String,
+    
     reputacion: {
         puntuacion_promedio: {
             type: Number,
