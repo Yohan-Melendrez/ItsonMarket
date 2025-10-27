@@ -7,5 +7,18 @@
     "mongodb": "^6.5.0",
     "mongoose": "^8.3.2",
     "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "mongodb-memory-server": "^10.2.3",
+    "supertest": "^7.1.4"
+  },
+   "scripts": {
+    "test": "jest --runInBand"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"],
+    "testTimeout": 30000
   }
 }
