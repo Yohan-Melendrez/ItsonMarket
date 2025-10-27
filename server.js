@@ -10,12 +10,14 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 app.use(express.json());
+app.use(cors());                   
+app.use(express.urlencoded());    
+app.use(errorHandler);
 
 // Rutas base
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/publicaciones', publicacionRoutes);
-app.use(errorHandler);
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
