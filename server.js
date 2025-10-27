@@ -1,10 +1,12 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const { connectDB } = require('./config/db');
 
 // Importar rutas
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const publicacionRoutes = require('./routes/publicacionesRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const authRoutes = require('./routes/authRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -18,6 +20,7 @@ app.use(errorHandler);
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/publicaciones', publicacionRoutes);
+app.use('/api/chats', chatRoutes);
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
@@ -38,4 +41,5 @@ app.listen(PORT, () => {
   console.log(`- GET  http://localhost:${PORT}/api/health`);
   console.log(`- CRUD http://localhost:${PORT}/api/usuarios (protegido)`);
   console.log(`- CRUD http://localhost:${PORT}/api/publicaciones (protegido)`);
+  console.log(`- CRUD http://localhost:${PORT}/api/chats (protegido)`);
 });
