@@ -1,3 +1,4 @@
+// controllers/transaccionController.js
 const TransaccionService = require('../services/TransaccionService');
 const service = new TransaccionService();
 

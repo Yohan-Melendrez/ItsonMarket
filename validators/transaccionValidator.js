@@ -1,3 +1,4 @@
+// validators/transaccionValidator.js
 const { body, param } = require('express-validator');
 
 const estadoPermitido = ['pendiente', 'completada', 'cancelada'];

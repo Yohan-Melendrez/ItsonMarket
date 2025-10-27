@@ -32,7 +32,6 @@ describe('TransaccionService (Mongo en memoria)', () => {
     await TransaccionModel.deleteMany({});
   });
 
-  // helpers
   const comprador = new mongoose.Types.ObjectId();
   const vendedor = new mongoose.Types.ObjectId();
   const publicacion = new mongoose.Types.ObjectId();

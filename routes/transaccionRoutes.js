@@ -1,3 +1,4 @@
+// routes/transaccionRoutes.js
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
@@ -5,7 +6,6 @@ const { crearValidator, actualizarValidator } = require('../validators/transacci
 const { handleValidationErrors } = require('../middleware/validation');
 const ctrl = require('../controllers/transaccionController');
 
-// todas las rutas de transacción requieren JWT
 router.use(auth);
 
 router.post('/', crearValidator, handleValidationErrors, ctrl.crear);
