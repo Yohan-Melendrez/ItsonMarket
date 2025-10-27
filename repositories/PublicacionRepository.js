@@ -1,6 +1,7 @@
 const { PublicacionModel } = require('../models/Publicacion');
 
 class PublicacionRepository {
+
   async crear(data) {
     const nueva = new PublicacionModel(data);
     return await nueva.save();
@@ -23,4 +24,4 @@ class PublicacionRepository {
   }
 }
 
-module.exports = { PublicacionRepository };
+module.exports = PublicacionRepository;
