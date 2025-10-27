@@ -1,11 +1,11 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors'); 
+const cors = require('cors');
 const { connectDB } = require('./config/db');
 
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const publicacionRoutes = require('./routes/publicacionesRoutes');
-const transaccionRoutes = require('./routes/transaccionRoutes'); 
+const chatRoutes = require('./routes/chatRoutes');
 const authRoutes = require('./routes/authRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -17,11 +17,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/publicaciones', publicacionRoutes);
-app.use('/api/transacciones', transaccionRoutes);
-app.use(errorHandler); 
-app.get('/api/health', (_req, res) =>
-  res.status(200).json({ status: 'OK', message: 'Servicio funcionando', timestamp: new Date().toISOString() })
-);
+app.use('/api/chats', chatRoutes);
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'Servicio funcionando',
+    timestamp: new Date().toISOString()
+  });
+});
+// Conexión a Mongo
+connectDB();
 
 connectDB();
 const PORT = process.env.PORT || 3000;
