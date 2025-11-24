@@ -4,6 +4,12 @@ const controller = require('../controllers/usuariosController');
 const authMiddleware = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
 const { crearUsuarioValidator, actualizarUsuarioValidator } = require('../validators/usuarioValidator');
+/**
+ * @route POST /api/usuarios
+ * @desc Crear un nuevo usuario
+ * @access Private
+ */
+router.post('/', crearUsuarioValidator, handleValidationErrors, controller.crearUsuario);
 
 router.use(authMiddleware);
 
@@ -14,12 +20,7 @@ router.use(authMiddleware);
  */
 router.get('/', controller.obtenerUsuarios);
 
-/**
- * @route POST /api/usuarios
- * @desc Crear un nuevo usuario
- * @access Private
- */
-router.post('/', crearUsuarioValidator, handleValidationErrors, controller.crearUsuario);
+
 
 /**
  * @route GET /api/usuarios/:id

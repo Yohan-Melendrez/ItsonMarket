@@ -1,13 +1,24 @@
+// validators/publicacionValidator.js
 const { body, param, query } = require('express-validator');
 
 const TIPOS = ['producto', 'servicio'];
+const DIGITS = /^\d{5,20}$/; // ajusta longitud si tu padrón lo requiere
 
+// El _id de la publicación SÍ es ObjectId:
 const idParam = [ param('id').isMongoId().withMessage('id inválido') ];
-const vendedorParam = [ param('vendedorId').isMongoId().withMessage('vendedorId inválido') ];
+
+// El vendedorId NO es ObjectId: es una cadena numérica
+const vendedorParam = [
+  param('vendedorId')
+    .isString().withMessage('vendedorId requerido')
+    .matches(DIGITS).withMessage('vendedorId inválido (solo dígitos)'),
+];
 
 exports.create = [
   body('tipo_publicacion').isIn(TIPOS).withMessage('tipo_publicacion inválido'),
-  body('vendedor_id').isMongoId().withMessage('vendedor_id inválido'),
+  body('vendedor_id')
+    .isString().withMessage('vendedor_id requerido')
+    .matches(DIGITS).withMessage('vendedor_id inválido (solo dígitos)'),
   body('titulo').isString().notEmpty(),
   body('descripcion').isString().notEmpty(),
   body('categoria').isString().notEmpty(),
@@ -19,7 +30,8 @@ exports.create = [
 exports.update = [
   ...idParam,
   body('tipo_publicacion').optional().isIn(TIPOS),
-  body('vendedor_id').optional().isMongoId(),
+  body('vendedor_id').optional()
+    .isString().matches(DIGITS).withMessage('vendedor_id inválido (solo dígitos)'),
   body('titulo').optional().isString().notEmpty(),
   body('descripcion').optional().isString().notEmpty(),
   body('categoria').optional().isString().notEmpty(),
@@ -32,7 +44,8 @@ exports.getById = [ ...idParam ];
 
 exports.list = [
   query('categoria').optional().isString(),
-  query('vendedor_id').optional().isMongoId(),
+  query('vendedor_id').optional()
+    .isString().matches(DIGITS).withMessage('vendedor_id inválido (solo dígitos)'),
   query('titulo').optional().isString(),
   query('tipo_publicacion').optional().isIn(TIPOS),
   query('precioMin').optional().isFloat({ min: 0 }),

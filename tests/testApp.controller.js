@@ -4,7 +4,7 @@ const app = express();
 app.use(express.json());
 
 // Router manual minimalista para el controller
-const c = require('../controllers/publicacionesController');
+const c = require('../controllers/publicacionController');
 
 // mapea igual que tus rutas reales (sólo lo necesario para probar)
 const r = express.Router();

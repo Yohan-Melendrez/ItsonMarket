@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const PublicacionSchema = new mongoose.Schema({
   tipo_publicacion: { type: String, enum: ["producto", "servicio"], required: true },
-  vendedor_id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
+  vendedor_id: { type: String, required: true },
   titulo: { type: String, required: true },
   descripcion: { type: String, required: true },
   categoria: { type: String, required: true },

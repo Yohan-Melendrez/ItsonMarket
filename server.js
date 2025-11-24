@@ -4,7 +4,7 @@ const cors = require('cors');
 const { connectDB } = require('./config/db');
 
 const usuarioRoutes = require('./routes/usuarioRoutes');
-const publicacionRoutes = require('./routes/publicacionesRoutes');
+const publicacionRoutes = require('./routes/publicacionRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const authRoutes = require('./routes/authRoutes');
 const errorHandler = require('./middleware/errorHandler');
