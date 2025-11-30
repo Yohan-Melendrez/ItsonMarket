@@ -1,10 +1,26 @@
 const { UsuarioModel } = require('../models/Usuario');
+const bcrypt = require('bcrypt');
 
 class UsuarioRepository {
 
-    async insert(usuarioData) {
-        const usuarioNuevo = new UsuarioModel(usuarioData);
-        return usuarioNuevo.save();
+    async insert(userData) {
+        if (userData.contrasena) {
+            userData.contrasena = await bcrypt.hash(userData.contrasena, 10);
+        }
+        const usuario = new UsuarioModel(userData);
+        return usuario.save();
+    }
+
+    async updateByItsonId(itsonId, updateData) {
+        if (updateData.contrasena) {
+            updateData.contrasena = await bcrypt.hash(updateData.contrasena, 10);
+        }
+
+        return UsuarioModel.findOneAndUpdate(
+            { itson_id: itsonId },
+            updateData,
+            { new: true }
+        );
     }
 
     async findAll() {
@@ -23,9 +39,7 @@ class UsuarioRepository {
         return UsuarioModel.findByIdAndUpdate(id, updateData, { new: true });
     }
 
-    async updateByItsonId(itson_id, updateData) {
-        return UsuarioModel.findOneAndUpdate({ itson_id: itson_id }, updateData, { new: true });
-    }
+
 
     async delete(id) {
         return UsuarioModel.findByIdAndDelete(id);
