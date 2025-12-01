@@ -4,9 +4,6 @@ const bcrypt = require('bcrypt');
 class UsuarioRepository {
 
     async insert(userData) {
-        if (userData.contrasena) {
-            userData.contrasena = await bcrypt.hash(userData.contrasena, 10);
-        }
         const usuario = new UsuarioModel(userData);
         return usuario.save();
     }

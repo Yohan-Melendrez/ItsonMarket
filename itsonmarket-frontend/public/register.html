@@ -1,0 +1,114 @@
+<section class="min-h-screen bg-gradient-to-br from-blue-300 to-blue-600 flex justify-center items-center py-8">
+  <div class="bg-white shadow-2xl p-10 rounded-2xl w-full max-w-3xl">
+
+    <a href="#/login" class="inline-flex items-center mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600 hover:text-blue-800 transition" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </a>
+
+    <img src="/imgs/logo-itson.jpg" class="h-16 mb-4" />
+
+    <h1 class="text-3xl font-bold mb-1">Crear Cuenta</h1>
+    <p class="text-gray-600 mb-8">Únete a la comunidad ITSONMarket</p>
+
+    <form id="registerForm" class="grid grid-cols-2 gap-6" novalidate>
+
+      <!-- ITSON ID -->
+      <div class="col-span-2">
+        <label class="font-medium text-sm">ITSON ID*</label>
+        <input id="itsonId" type="text" placeholder="00000247037"
+          class="w-full border rounded-lg px-3 py-2 mt-1"
+          inputmode="numeric" maxlength="11"
+          oninput="this.value = this.value.replace(/\D/g, '').slice(0,11);" />
+        <p id="err-itsonId" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
+      </div>
+
+      <!-- Nombre -->
+      <div>
+        <label class="font-medium text-sm">Nombre Completo*</label>
+        <input id="nombre" type="text" placeholder="Juan Pérez García"
+          class="w-full border rounded-lg px-3 py-2 mt-1" />
+        <p id="err-nombre" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
+      </div>
+
+      <!-- Correo -->
+      <div>
+        <label class="font-medium text-sm">Correo Institucional*</label>
+        <input id="correo" type="email" placeholder="ejemplo@potros.itson.edu.mx"
+          class="w-full border rounded-lg px-3 py-2 mt-1" />
+        <p id="err-correo" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
+      </div>
+
+      <!-- Contraseña -->
+      <div>
+        <label class="font-medium text-sm">Contraseña*</label>
+        <input id="pass1" type="password"
+          class="w-full border rounded-lg px-3 py-2 mt-1" />
+        <p id="err-pass1" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
+      </div>
+
+      <!-- Confirmar contraseña -->
+      <div>
+        <label class="font-medium text-sm">Confirmar Contraseña*</label>
+        <input id="pass2" type="password"
+          class="w-full border rounded-lg px-3 py-2 mt-1" />
+        <p id="err-pass2" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
+      </div>
+
+      <!-- Carrera -->
+      <div>
+        <label class="font-medium text-sm">Carrera*</label>
+        <select id="carrera" class="w-full border rounded-lg px-3 py-2 mt-1">
+          <option value="">Selecciona una opción</option>
+          <option>Ingeniería en Software</option>
+          <option>Ingeniería Industrial</option>
+          <option>Ingeniería en Sistemas</option>
+          <option>Administración</option>
+          <option>Contaduría</option>
+        </select>
+        <p id="err-carrera" class="text-red-600 text-xs mt-1 hidden"style="display:none"></p>
+      </div>
+
+      <!-- Teléfono -->
+      <div>
+        <label class="font-medium text-sm">Teléfono*</label>
+        <input id="telefono" type="text" placeholder="6441234567"
+          class="w-full border rounded-lg px-3 py-2 mt-1"
+          inputmode="numeric" maxlength="10"
+          oninput="this.value = this.value.replace(/\D/g, '').slice(0,10);" />
+        <p id="err-telefono" class="text-red-600 text-xs mt-1 hidden"style="display:none"></p>
+      </div>
+
+      <!-- Foto -->
+      <div class="col-span-2">
+        <label class="font-medium text-sm">Foto de perfil (opcional)</label>
+        <div id="dropArea"
+          class="w-full h-32 border-2 border-dashed rounded-lg flex items-center justify-center text-gray-500 mt-2">
+          Haz clic o arrastra una imagen
+        </div>
+        <input type="file" id="fileInput" class="hidden" accept="image/*" />
+        <img id="preview" class="h-24 mt-3 rounded-full hidden" />
+      </div>
+
+      <!-- Términos -->
+      <div class="col-span-2 flex items-start mt-2 gap-2">
+        <input id="terminos" type="checkbox" class="mt-1">
+        <p class="text-xs text-gray-600">
+          Acepto los términos de servicio y políticas.
+        </p>
+      </div>
+      <p id="err-terminos" class="text-red-600 text-xs mt-1 hidden col-span-2" style="display:none"></p>
+
+      <!-- Botón -->
+      <div class="col-span-2 mt-4">
+        <button id="btnRegister" disabled
+          class="w-full bg-blue-700 text-white py-3 rounded-lg font-semibold opacity-50 cursor-not-allowed">
+          Crear Cuenta
+        </button>
+      </div>
+
+    </form>
+  </div>
+</section>

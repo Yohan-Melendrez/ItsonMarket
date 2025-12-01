@@ -1,0 +1,29 @@
+<section class="flex justify-center items-center h-screen bg-gradient-to-br from-blue-300 to-blue-600">
+  <div class="bg-white shadow-xl p-10 rounded-2xl w-full max-w-md fade-target">
+
+    <img src="/imgs/logo-itson.jpg" class="h-14 mx-auto mb-4">
+
+    <h1 class="text-center text-2xl font-semibold">ITSONMarket</h1>
+    <p class="text-center text-gray-600 mb-6 text-sm">
+      Plataforma universitaria de compra y venta
+    </p>
+
+    <label class="block text-sm font-medium mb-1">ITSON ID*</label>
+    <input id="itson_id" class="w-full border rounded-lg px-3 py-2 mb-1" placeholder="00000247037" maxlength="11">
+    <p id="err-id" class="text-red-600 text-xs mb-3 hidden"></p>
+
+    <label class="block text-sm font-medium mb-1">Contraseña*</label>
+    <input id="password" type="password" class="w-full border rounded-lg px-3 py-2 mb-1">
+    <p id="err-pass" class="text-red-600 text-xs mb-3 hidden"></p>
+
+    <button id="btn-login" class="bg-blue-700 hover:bg-blue-800 text-white w-full py-2 rounded-lg mt-2">
+      Iniciar Sesión
+    </button>
+
+    <p class="text-center mt-4 text-sm">
+      ¿No tienes cuenta?
+      <a href="#/register" class="text-blue-600 hover:underline">Regístrate</a>
+    </p>
+
+  </div>
+</section>

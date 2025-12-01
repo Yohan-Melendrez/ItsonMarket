@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ItsonMarket</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity .25s, transform .25s;
+        }
+
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fade-exit {
+            opacity: 1;
+            transition: opacity .25s;
+        }
+
+        .fade-exit-active {
+            opacity: 0;
+        }
+    </style>
+
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-300 to-blue-600">
+
+    <div id="landing" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white shadow-2xl p-10 rounded-2xl w-full max-w-md text-center">
+            <img src="/imgs/logo-itson.jpg" class="h-16 mx-auto mb-4" />
+            <h1 class="text-3xl font-bold mb-2">ITSONMarket</h1>
+            <p class="text-gray-600 text-sm mb-8">
+                Plataforma universitaria de compra y venta
+            </p>
+            <div class="flex flex-col gap-4">
+                <a href="#/login" class="bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-medium">
+                    Iniciar Sesión
+                </a>
+                <a href="#/register" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium">
+                    Registrarse
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <main id="app" class="p-6"></main>
+
+    <script src="/js/app.js"></script>
+
+</body>
+
+</html>
