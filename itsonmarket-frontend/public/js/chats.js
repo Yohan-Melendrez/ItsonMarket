@@ -2,13 +2,19 @@
  * Chats Module - ItsonMarket
  */
 
-let chatsData = [];
-let chatActualId = null;
-let mensajesPollingInterval = null;
+var chatsData = window.chatsData || [];
+var chatActualId = chatActualId || null;
+
+if (window.mensajesPollingInterval) clearInterval(window.mensajesPollingInterval);
+var mensajesPollingInterval = null;
+
+//Se usa el window para evitar redeclaraciones
+window.chatsData = chatsData;
+window.chatActualId = chatActualId;
 
 function initChats() {
     console.log("initChats() inicializado");
-    
+
     if (!window.AuthState?.isLoggedIn()) {
         navigateTo('/login');
         return;
@@ -18,10 +24,42 @@ function initChats() {
     const params = window.routeParams || {};
     if (params.id) {
         chatActualId = params.id;
+    } else {
+        chatActualId = null;
+
+        const sidebar = document.getElementById('chatSidebar');
+        const chatActivo = document.getElementById('chatActivo');
+        const chatVacio = document.getElementById('chatVacio');
+
+        if (sidebar) sidebar.classList.remove('hidden');
+        if (chatActivo) chatActivo.classList.add('hidden');
+        if (chatVacio) chatVacio.classList.remove('hidden');
+
+        // Limpiamos la selección visual de la lista
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.classList.remove('active');
+        });
     }
 
-    initEventListeners();
-    cargarChats();
+    let intentos = 0;
+    const vigilarDOM = setInterval(() => {
+        const chatList = document.getElementById('chatList');
+        intentos++;
+
+        if (chatList) {
+            clearInterval(vigilarDOM);
+            initEventListeners();
+            if (window.chatsData && window.chatsData.length > 0) {
+                console.log("Pintando desde memoria caché...");
+                const loading = document.getElementById('loadingChats');
+                if (loading) loading.classList.add('hidden');
+                renderChatList(window.chatsData);
+            }
+            cargarChats();
+        } else if (intentos > 50) {
+            clearInterval(vigilarDOM);
+        }
+    }, 30);
 }
 
 function initEventListeners() {
@@ -68,11 +106,11 @@ function initEventListeners() {
             const sidebar = document.getElementById('chatSidebar');
             const chatActivo = document.getElementById('chatActivo');
             const chatVacio = document.getElementById('chatVacio');
-            
+
             if (sidebar) sidebar.classList.remove('hidden');
             if (chatActivo) chatActivo.classList.add('hidden');
             if (chatVacio) chatVacio.classList.remove('hidden');
-            
+
             chatActualId = null;
         });
     }
@@ -110,16 +148,19 @@ async function cargarChats() {
 
         if (!res.ok) throw new Error(data.message || 'Error al cargar chats');
 
-        chatsData = Array.isArray(data) ? data : (data.chats || []);
+        const chatsRecibidos = Array.isArray(data) ? data : (data.chats || []);
 
+        window.chatsData = chatsRecibidos;
+        chatsData = chatsRecibidos;
         if (loading) loading.classList.add('hidden');
-        renderChatList();
+        renderChatList(window.chatsData);
 
-        // Si hay un chat específico en la URL, abrirlo
-        if (chatActualId) {
-            const chat = chatsData.find(c => c._id === chatActualId);
+        if (window.chatActualId) {
+            const chat = window.chatsData.find(c => c._id === window.chatActualId);
             if (chat) {
                 abrirChat(chat);
+            } else {
+                cargarChatIndividual(window.chatActualId);
             }
         }
 
@@ -155,36 +196,47 @@ function renderChatList(filteredChats = null) {
 
     chatList.innerHTML = chats.map(chat => {
         // Encontrar el otro participante
-        const otroParticipante = chat.participantes?.find(p => 
-            (p._id || p) !== userId
-        ) || {};
-        
-        const ultimoMensaje = chat.mensajes?.[chat.mensajes.length - 1] || {};
-        const noLeidos = chat.mensajes?.filter(m => 
-            !m.leido && (m.emisor_id?._id || m.emisor_id) !== userId
-        ).length || 0;
+        let otroParticipante = chat.participantes.find(p => {
+            const pId = p._id || p;
+            return pId.toString() !== userId.toString();
+        });
+
+        if (!otroParticipante) {
+            otroParticipante = chat.participantes[0] || {};
+        }
+
+        const nombreMostrar = otroParticipante.nombre || "Usuario";
+        const fotoMostrar = otroParticipante.foto || '/imgs/default-avatar.svg';
+
+        const ultimoMensaje = chat.mensajes && chat.mensajes.length > 0
+            ? chat.mensajes[chat.mensajes.length - 1]
+            : { contenido: 'Nuevo chat', fecha: chat.createdAt };
+
+        const fechaMostrar = ultimoMensaje.fecha ? formatRelativeTime(ultimoMensaje.fecha) : '';
+
+        const isActive = chat._id === chatActualId ? 'active' : '';
 
         return `
-            <div class="chat-item ${chat._id === chatActualId ? 'active' : ''}" 
+            <div class="chat-item ${isActive}" 
                  data-chat-id="${chat._id}" 
                  onclick="seleccionarChat('${chat._id}')">
-                <img src="${otroParticipante.foto || '/imgs/default-avatar.svg'}" 
-                     alt="${otroParticipante.nombre || 'Usuario'}" 
+                <img src="${fotoMostrar}" 
+                     alt="${nombreMostrar}" 
                      class="chat-item-avatar"
                      onerror="this.src='/imgs/default-avatar.svg'">
                 <div class="chat-item-content">
                     <div class="chat-item-header">
-                        <span class="chat-item-name">${otroParticipante.nombre || 'Usuario'}</span>
-                        <span class="chat-item-time">${ultimoMensaje.fecha ? formatRelativeTime(ultimoMensaje.fecha) : ''}</span>
+                        <span class="chat-item-name">${nombreMostrar}</span>
+                        <span class="chat-item-time">${fechaMostrar}</span>
                     </div>
                     <p class="chat-item-preview">
                         ${ultimoMensaje.contenido || 'Sin mensajes'}
                     </p>
                 </div>
-                ${noLeidos > 0 ? `<span class="chat-item-unread">${noLeidos}</span>` : ''}
             </div>
         `;
     }).join('');
+
 }
 
 function filtrarChats(query) {
@@ -195,7 +247,7 @@ function filtrarChats(query) {
 
     const userId = window.AuthState.user?._id;
     const filtered = chatsData.filter(chat => {
-        const otroParticipante = chat.participantes?.find(p => 
+        const otroParticipante = chat.participantes?.find(p =>
             (p._id || p) !== userId
         ) || {};
         return otroParticipante.nombre?.toLowerCase().includes(query.toLowerCase());
@@ -204,7 +256,7 @@ function filtrarChats(query) {
     renderChatList(filtered);
 }
 
-window.seleccionarChat = async function(chatId) {
+window.seleccionarChat = async function (chatId) {
     const chat = chatsData.find(c => c._id === chatId);
     if (chat) {
         await abrirChat(chat);
@@ -230,14 +282,14 @@ async function abrirChat(chat) {
     // Ocultar estado vacío y mostrar chat
     if (chatVacio) chatVacio.classList.add('hidden');
     if (chatActivo) chatActivo.classList.remove('hidden');
-    
+
     // En móvil, ocultar sidebar
     if (window.innerWidth <= 768 && chatSidebar) {
         chatSidebar.classList.add('hidden');
     }
 
     // Encontrar el otro participante
-    const otroParticipante = chat.participantes?.find(p => 
+    const otroParticipante = chat.participantes?.find(p =>
         (p._id || p) !== userId
     ) || {};
 
@@ -281,11 +333,11 @@ async function cargarMensajes(chatId) {
         });
 
         const data = await res.json();
-        
+
         if (!res.ok) throw new Error(data.message || 'Error al cargar mensajes');
 
-        const mensajes = Array.isArray(data) ? data : (data.mensajes || []);
-        renderMensajes(mensajes);
+        const listaMensajes = data.data || data.mensajes || data;
+        renderMensajes(listaMensajes);
 
         // Scroll al final
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -306,7 +358,7 @@ async function cargarMensajes(chatId) {
 function renderMensajes(mensajes) {
     const chatMessages = document.getElementById('chatMessages');
     const userId = window.AuthState.user?._id;
-    
+
     if (!chatMessages) return;
 
     if (mensajes.length === 0) {
@@ -320,10 +372,10 @@ function renderMensajes(mensajes) {
     }
 
     chatMessages.innerHTML = mensajes.map(msg => {
-        const esMio = (msg.emisor_id?._id || msg.emisor_id) === userId;
-        const hora = msg.fecha ? new Date(msg.fecha).toLocaleTimeString('es-MX', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        const esMio = (msg.remitente_id?._id || msg.remitente_id || msg.emisor_id?._id || msg.emisor_id) === userId;
+        const hora = msg.fecha ? new Date(msg.fecha).toLocaleTimeString('es-MX', {
+            hour: '2-digit',
+            minute: '2-digit'
         }) : '';
 
         if (msg.tipo === 'imagen' && msg.imagen) {
@@ -360,20 +412,27 @@ async function enviarMensaje() {
     input.value = '';
 
     try {
+        const miUsuario = window.AuthState.user;
+        const miId = miUsuario._id || miUsuario.id;
+
         const res = await fetch(`/api/chats/${chatActualId}/mensajes`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${window.AuthState.token}`
             },
-            body: JSON.stringify({ contenido })
+            body: JSON.stringify({
+                contenido: contenido,
+                remitente_id: miId,
+                tipo: 'texto'
+            })
         });
 
         if (!res.ok) throw new Error('Error al enviar mensaje');
 
         // Recargar mensajes
         await cargarMensajes(chatActualId);
-        
+
         // Actualizar lista de chats
         cargarChats();
 
@@ -418,14 +477,18 @@ async function enviarImagen(file) {
 
 async function marcarComoLeido(chatId) {
     try {
-        await fetch(`/api/chats/${chatId}/leer`, {
-            method: 'PUT',
+        await fetch(`/api/chats/${chatId}/mensajes/leidos`, {
+            method: 'PATCH',
             headers: {
+                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${window.AuthState.token}`
-            }
+            },
+            body: JSON.stringify({
+                usuario_id: window.AuthState.user._id || window.AuthState.user.id
+            })
         });
     } catch (err) {
-        console.error("Error marcando como leído:", err);
+        console.warn("No se pudo marcar como leído:", err);
     }
 }
 
@@ -449,13 +512,13 @@ function abrirModalNuevoChat() {
     if (modal) modal.classList.remove('hidden');
 }
 
-window.cerrarModalNuevoChat = function() {
+window.cerrarModalNuevoChat = function () {
     const modal = document.getElementById('modalNuevoChat');
     if (modal) modal.classList.add('hidden');
-    
+
     const resultados = document.getElementById('resultadosUsuarios');
     if (resultados) resultados.innerHTML = '';
-    
+
     const input = document.getElementById('buscarUsuario');
     if (input) input.value = '';
 };
@@ -506,7 +569,7 @@ async function buscarUsuarios(query) {
     }
 }
 
-window.iniciarChatCon = async function(usuarioId) {
+window.iniciarChatCon = async function (usuarioId) {
     try {
         const res = await fetch('/api/chats', {
             method: 'POST',
@@ -522,7 +585,7 @@ window.iniciarChatCon = async function(usuarioId) {
         if (!res.ok) throw new Error(data.message || 'Error al crear chat');
 
         cerrarModalNuevoChat();
-        
+
         // Recargar chats y abrir el nuevo
         await cargarChats();
         const chatId = data._id || data.chat?._id;
@@ -538,23 +601,23 @@ window.iniciarChatCon = async function(usuarioId) {
 };
 
 // Opciones del chat
-window.cerrarModalOpciones = function() {
+window.cerrarModalOpciones = function () {
     const modal = document.getElementById('modalChatOpciones');
     if (modal) modal.classList.add('hidden');
 };
 
-window.verPerfilUsuario = function() {
+window.verPerfilUsuario = function () {
     cerrarModalOpciones();
     // TODO: Implementar vista de perfil de otro usuario
     showToast('Función próximamente disponible', 'info');
 };
 
-window.silenciarNotificaciones = function() {
+window.silenciarNotificaciones = function () {
     cerrarModalOpciones();
     showToast('Notificaciones silenciadas', 'success');
 };
 
-window.eliminarConversacion = async function() {
+window.eliminarConversacion = async function () {
     if (!chatActualId || !confirm('¿Eliminar esta conversación?')) return;
 
     try {
@@ -569,7 +632,7 @@ window.eliminarConversacion = async function() {
 
         cerrarModalOpciones();
         chatActualId = null;
-        
+
         const chatVacio = document.getElementById('chatVacio');
         const chatActivo = document.getElementById('chatActivo');
         if (chatVacio) chatVacio.classList.remove('hidden');
@@ -585,7 +648,7 @@ window.eliminarConversacion = async function() {
 };
 
 // Ver imagen completa
-window.verImagenCompleta = function(src) {
+window.verImagenCompleta = function (src) {
     // Crear modal temporal para ver imagen
     const modal = document.createElement('div');
     modal.className = 'modal';
@@ -607,11 +670,16 @@ function escapeHtml(text) {
 
 // Limpiar al salir
 window.addEventListener('hashchange', () => {
-    if (!location.hash.includes('/chats')) {
+    const esRutaChats = location.hash.includes('/chats');
+    const esRaizChats = location.hash.endsWith('/chats') || location.hash.endsWith('/chats/');
+
+    if (!esRutaChats) {
         if (mensajesPollingInterval) {
             clearInterval(mensajesPollingInterval);
             mensajesPollingInterval = null;
         }
+        chatActualId = null;
+    } else if (esRaizChats) {
         chatActualId = null;
     }
 });
@@ -619,3 +687,28 @@ window.addEventListener('hashchange', () => {
 // Exponer función globalmente
 window.initChats = initChats;
 window.cargarChats = cargarChats;
+
+async function cargarChatIndividual(id) {
+    try {
+        const res = await fetch(`/api/chats/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${window.AuthState.token}`
+            }
+        });
+
+        const data = await res.json();
+
+        const chat = data.data || data;
+
+        if (chat && chat._id) {
+            const existe = chatsData.find(c => c._id === chat._id);
+            if (!existe) {
+                chatsData.push(chat);
+                renderChatList();
+            }
+            abrirChat(chat);
+        }
+    } catch (err) {
+        console.error("Error cargando chat individual:", err);
+    }
+}

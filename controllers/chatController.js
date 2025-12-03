@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const ChatRepository = require('../repositories/ChatRepository');
 const repo = new ChatRepository();
 
@@ -8,17 +9,20 @@ const repo = new ChatRepository();
  */
 exports.obtenerChats = async (req, res, next) => {
   try {
-    const usuarioId = req.user?.id || req.user?._id;
-    
-    // Obtener solo los chats donde el usuario es participante
-    const chats = await repo.findByParticipante(usuarioId);
+    const usuarioIdString = req.user?.id || req.user?._id;
 
-    if (!chats || chats.length === 0) {
-      return res.status(200).json([]);
+    if (!usuarioIdString) {
+      return res.status(401).json({ message: "No hay usuario en el request" });
     }
 
-    res.status(200).json(chats);
+    const usuarioObjectId = new mongoose.Types.ObjectId(usuarioIdString);
+
+    const chats = await repo.findByParticipante(usuarioObjectId);
+
+    res.status(200).json(chats || []);
+
   } catch (err) {
+    console.error("Error grave:", err);
     next(err);
   }
 };
@@ -56,15 +60,15 @@ exports.obtenerChatPorId = async (req, res, next) => {
 exports.crearChat = async (req, res, next) => {
   try {
     let { participantes, participante_id, publicacion_id, mensajes } = req.body;
-    
+
     // El usuario actual viene del token
     const usuarioActualId = req.user?.id || req.user?._id;
-    
+
     // Si se envía participante_id (singular), construir el array de participantes
     if (participante_id && !participantes) {
       participantes = [usuarioActualId, participante_id];
     }
-    
+
     // Validar que hay participantes
     if (!participantes || participantes.length < 2) {
       return res.status(400).json({
@@ -159,7 +163,7 @@ exports.enviarMensaje = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { contenido, tipo, remitente_id, emisor_id } = req.body;
-    
+
     // El emisor viene del token o del body
     const emisorIdFinal = req.user?.id || req.user?._id || emisor_id || remitente_id;
 

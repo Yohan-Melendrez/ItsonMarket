@@ -3,19 +3,22 @@
  */
 
 // Variables globales del módulo
-let publicacionesData = [];
-let filtroActual = {
+var publicacionesData = window.publicacionesData || [];
+var filtroActual = window.filtroActual || {
     busqueda: '',
     categoria: '',
     tipo: '',
     orden: 'recientes'
 };
+//Se usa el window para evitar redeclaraciones
+window.publicacionesData = publicacionesData;
+window.filtroActual = filtroActual;
 
 function initPublicaciones() {
     console.log("initPublicaciones() inicializado");
-    
+
     const path = location.hash.replace("#", "");
-    
+
     if (path === '/publicaciones') {
         initListaPublicaciones();
     } else if (path === '/publicaciones/crear') {
@@ -84,7 +87,7 @@ async function cargarPublicaciones() {
 
         // El backend devuelve {page, limit, total, pages, items}
         publicacionesData = Array.isArray(data) ? data : (data.items || data.publicaciones || []);
-        
+
         if (loading) loading.classList.add("hidden");
         renderPublicaciones();
 
@@ -119,7 +122,7 @@ function renderPublicaciones() {
         if (filtroActual.busqueda) {
             const busqueda = filtroActual.busqueda.toLowerCase();
             const match = pub.titulo?.toLowerCase().includes(busqueda) ||
-                         pub.descripcion?.toLowerCase().includes(busqueda);
+                pub.descripcion?.toLowerCase().includes(busqueda);
             if (!match) return false;
         }
         if (filtroActual.tipo && pub.tipo_publicacion !== filtroActual.tipo) return false;
@@ -171,19 +174,19 @@ function crearCardPublicacion(pub) {
     const imagen = pub.detalles?.imagenes?.[0] || pub.imagenes?.[0] || '/imgs/default-product.svg';
     const precio = formatCurrency ? formatCurrency(pub.precio || 0) : `$${pub.precio || 0}`;
     const fecha = formatRelativeTime ? formatRelativeTime(pub.fecha_publicacion || pub.createdAt) : '';
-    
+
     return `
         <div class="publicacion-card card" data-id="${pub._id}" style="cursor: pointer; padding: 0; overflow: hidden;">
             <div style="position: relative;">
                 <img src="${imagen}" alt="${pub.titulo}" 
                      style="width: 100%; height: 180px; object-fit: cover;"
                      onerror="this.src='/imgs/default-product.svg'">
-                ${pub.tipo_publicacion === 'servicio' ? 
-                    '<span class="badge badge-accent" style="position: absolute; top: 0.75rem; left: 0.75rem;">Servicio</span>' : 
-                    ''}
-                ${pub.estado === 'vendido' ? 
-                    '<div style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;"><span class="badge" style="background: var(--error); color: white; font-size: 1rem;">Vendido</span></div>' : 
-                    ''}
+                ${pub.tipo_publicacion === 'servicio' ?
+            '<span class="badge badge-accent" style="position: absolute; top: 0.75rem; left: 0.75rem;">Servicio</span>' :
+            ''}
+                ${pub.estado === 'vendido' ?
+            '<div style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;"><span class="badge" style="background: var(--error); color: white; font-size: 1rem;">Vendido</span></div>' :
+            ''}
             </div>
             <div style="padding: 1rem;">
                 <p style="font-size: 0.8rem; color: var(--gray-500); margin-bottom: 0.25rem;">
@@ -272,22 +275,22 @@ function initCrearPublicacion() {
     // Manejo de imágenes
     if (dropArea && inputImagenes) {
         dropArea.addEventListener("click", () => inputImagenes.click());
-        
+
         dropArea.addEventListener("dragover", (e) => {
             e.preventDefault();
             dropArea.classList.add("dragover");
         });
-        
+
         dropArea.addEventListener("dragleave", () => {
             dropArea.classList.remove("dragover");
         });
-        
+
         dropArea.addEventListener("drop", (e) => {
             e.preventDefault();
             dropArea.classList.remove("dragover");
             handleImageFiles(e.dataTransfer.files);
         });
-        
+
         inputImagenes.addEventListener("change", () => {
             handleImageFiles(inputImagenes.files);
         });
@@ -310,7 +313,7 @@ function initCrearPublicacion() {
                 showToast(`Máximo ${maxFiles} imágenes`, 'warning');
                 return;
             }
-            
+
             // Convertir a Base64
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -323,7 +326,7 @@ function initCrearPublicacion() {
 
     function renderImagePreviews() {
         if (!previewContainer) return;
-        
+
         previewContainer.innerHTML = imagenesBase64.map((base64, index) => `
             <div class="image-preview" style="position: relative; display: inline-block;">
                 <img src="${base64}" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md);">
@@ -336,7 +339,7 @@ function initCrearPublicacion() {
         `).join("");
     }
 
-    window.removeImageAtIndex = function(index) {
+    window.removeImageAtIndex = function (index) {
         imagenesBase64.splice(index, 1);
         renderImagePreviews();
     };
@@ -494,7 +497,7 @@ async function initDetallePublicacion() {
         if (categoria) categoria.textContent = pub.categoria || 'Sin categoría';
         if (vistas) vistas.textContent = `${pub.vistas || 0} vistas`;
         if (fecha) fecha.textContent = `Publicado ${formatRelativeTime(pub.fecha_publicacion || pub.createdAt)}`;
-        
+
         // Badge de tipo
         if (tipoBadge) {
             tipoBadge.textContent = pub.tipo_publicacion === 'servicio' ? 'Servicio' : 'Producto';
@@ -559,18 +562,31 @@ async function initDetallePublicacion() {
         }
         if (vendedorCarrera) vendedorCarrera.textContent = vendedor.carrera || '';
 
-        // Botones de acción
+        // Obtener ID del usuario actual de forma segura
+        const usuarioActualId = window.AuthState.user?._id || window.AuthState.user?.id;
+
+        // Verificar si soy el dueño
+        const soyElDueno = usuarioActualId === (vendedor._id || vendedorId);
+
         if (btnContactar) {
-            btnContactar.addEventListener('click', () => {
-                if (!window.AuthState?.isLoggedIn()) {
-                    showToast('Inicia sesión para contactar', 'warning');
-                    navigateTo('/login');
-                    return;
-                }
-                // Iniciar chat con vendedor
-                iniciarChatConVendedor(vendedor._id, pub._id);
-            });
+            if (soyElDueno) {
+                btnContactar.disabled = true;
+                btnContactar.innerHTML = '<span>Es tu publicación</span>';
+                btnContactar.classList.add('btn-disabled');
+            } else {
+                // Lógica normal para contactar
+                btnContactar.addEventListener('click', () => {
+                    if (!window.AuthState?.isLoggedIn()) {
+                        showToast('Inicia sesión para contactar', 'warning');
+                        navigateTo('/login');
+                        return;
+                    }
+                    const idVendedor = vendedor._id || vendedorId;
+                    iniciarChatConVendedor(idVendedor, pub._id);
+                });
+            }
         }
+
 
         if (btnComprar) {
             btnComprar.addEventListener('click', () => {
@@ -591,10 +607,10 @@ async function initDetallePublicacion() {
 }
 
 // Función para cambiar imagen en galería
-window.cambiarImagen = function(src, thumb) {
+window.cambiarImagen = function (src, thumb) {
     const imagenPrincipal = document.getElementById("imagen-principal");
     if (imagenPrincipal) imagenPrincipal.src = src;
-    
+
     // Actualizar bordes de thumbnails
     document.querySelectorAll('.gallery-thumb').forEach(t => {
         t.style.borderColor = 'transparent';
@@ -605,6 +621,15 @@ window.cambiarImagen = function(src, thumb) {
 // Iniciar chat con vendedor
 async function iniciarChatConVendedor(vendedorId, publicacionId) {
     try {
+        const miUsuario = window.AuthState.user;
+        const miId = miUsuario._id || miUsuario.id;
+
+        // Validar que tengamos ambos IDs
+        if (!miId || !vendedorId) {
+            showToast('Error de identificación de usuarios', 'error');
+            return;
+        }
+
         const res = await fetch("/api/chats", {
             method: "POST",
             headers: {
@@ -612,13 +637,13 @@ async function iniciarChatConVendedor(vendedorId, publicacionId) {
                 'Authorization': `Bearer ${window.AuthState.token}`
             },
             body: JSON.stringify({
-                participante_id: vendedorId,
+                participantes: [miId, vendedorId], 
                 publicacion_id: publicacionId
             })
         });
 
         const data = await res.json();
-        
+
         if (!res.ok) {
             throw new Error(data.message || "Error al iniciar chat");
         }
@@ -687,7 +712,7 @@ async function realizarCompra(publicacionId) {
 }
 
 // Cerrar modal de compra
-window.cerrarModalCompra = function() {
+window.cerrarModalCompra = function () {
     const modal = document.getElementById("modal-compra");
     if (modal) modal.classList.add("hidden");
 };

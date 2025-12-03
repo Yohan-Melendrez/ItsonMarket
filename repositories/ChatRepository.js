@@ -16,8 +16,11 @@ class ChatRepository {
   }
 
   async findByParticipante(usuario_id) {
-    return ChatModel.find({ participantes: usuario_id }).populate('participantes', 'nombre foto carrera');
-  }
+   return ChatModel.find({ participantes: usuario_id })
+      .populate('participantes', 'nombre foto carrera')
+      .populate('publicacion_id', 'titulo precio detalles') 
+      .sort({ ultima_actualizacion: -1 }); 
+  }
 
   async findByParticipants(participantes) {
     // Buscar un chat que contenga exactamente estos participantes (en cualquier orden)

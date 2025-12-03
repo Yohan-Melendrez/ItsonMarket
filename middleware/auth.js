@@ -15,7 +15,14 @@ const authMiddleware = (req, res, next) => {
     
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'clave_secreta_itson');
-      req.user = decoded;
+      
+      const payload = decoded.user || decoded;
+
+      if (payload.sub && !payload.id) {
+          payload.id = payload.sub;
+          payload._id = payload.sub; 
+      }
+      req.user = payload;
       next();
     } catch (jwtError) {
       return res.status(401).json({
