@@ -80,25 +80,6 @@ function initEventListeners() {
         });
     }
 
-    // Botón adjuntar
-    const btnAdjuntar = document.getElementById('btnAdjuntar');
-    const archivoAdjunto = document.getElementById('archivoAdjunto');
-    if (btnAdjuntar && archivoAdjunto) {
-        btnAdjuntar.addEventListener('click', () => archivoAdjunto.click());
-        archivoAdjunto.addEventListener('change', () => {
-            const file = archivoAdjunto.files[0];
-            if (file) {
-                enviarImagen(file);
-            }
-        });
-    }
-
-    // Botón nuevo chat
-    const btnNuevoChat = document.getElementById('btnNuevoChat');
-    if (btnNuevoChat) {
-        btnNuevoChat.addEventListener('click', abrirModalNuevoChat);
-    }
-
     // Botón volver (móvil)
     const btnVolver = document.getElementById('btnVolverChats');
     if (btnVolver) {
@@ -114,28 +95,25 @@ function initEventListeners() {
             chatActualId = null;
         });
     }
-
-    // Botón opciones del chat
-    const btnOpciones = document.getElementById('btnChatOpciones');
-    if (btnOpciones) {
-        btnOpciones.addEventListener('click', () => {
-            const modal = document.getElementById('modalChatOpciones');
-            if (modal) modal.classList.remove('hidden');
-        });
-    }
-
-    // Búsqueda de usuarios para nuevo chat
-    const buscarUsuario = document.getElementById('buscarUsuario');
-    if (buscarUsuario) {
-        buscarUsuario.addEventListener('input', debounce((e) => {
-            buscarUsuarios(e.target.value);
-        }, 500));
-    }
 }
 
 async function cargarChats() {
     const chatList = document.getElementById('chatList');
     const loading = document.getElementById('loadingChats');
+
+    // Verificar que hay token antes de hacer la petición
+    if (!window.AuthState?.token) {
+        console.log("No hay token de autenticación");
+        if (loading) loading.classList.add('hidden');
+        if (chatList) {
+            chatList.innerHTML = `
+                <div class="text-center" style="padding: 2rem; color: var(--gray-500);">
+                    <p>Inicia sesión para ver tus mensajes</p>
+                </div>
+            `;
+        }
+        return;
+    }
 
     try {
         const res = await fetch('/api/chats', {
@@ -383,18 +361,6 @@ function renderMensajes(mensajes) {
             minute: '2-digit'
         }) : '';
 
-        if (msg.tipo === 'imagen' && msg.imagen) {
-            return `
-                <div class="chat-message ${esMio ? 'sent' : ''}">
-                    <div class="chat-message-content">
-                        <img src="${msg.imagen}" alt="Imagen" class="chat-message-image" 
-                             onclick="verImagenCompleta('${msg.imagen}')">
-                        <span class="chat-message-time">${hora}</span>
-                    </div>
-                </div>
-            `;
-        }
-
         return `
             <div class="chat-message ${esMio ? 'sent' : ''}">
                 <div class="chat-message-content">
@@ -448,38 +414,6 @@ async function enviarMensaje() {
     }
 }
 
-async function enviarImagen(file) {
-    if (!chatActualId) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('La imagen no debe superar 5MB', 'error');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('imagen', file);
-    formData.append('tipo', 'imagen');
-
-    try {
-        const res = await fetch(`/api/chats/${chatActualId}/mensajes`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${window.AuthState.token}`
-            },
-            body: formData
-        });
-
-        if (!res.ok) throw new Error('Error al enviar imagen');
-
-        await cargarMensajes(chatActualId);
-        cargarChats();
-
-    } catch (err) {
-        console.error("Error enviando imagen:", err);
-        showToast('Error al enviar la imagen', 'error');
-    }
-}
-
 async function marcarComoLeido(chatId) {
     try {
         await fetch(`/api/chats/${chatId}/mensajes/leidos`, {
@@ -510,161 +444,6 @@ function iniciarPollingMensajes() {
         }
     }, 5000);
 }
-
-// Nuevo chat
-function abrirModalNuevoChat() {
-    const modal = document.getElementById('modalNuevoChat');
-    if (modal) modal.classList.remove('hidden');
-}
-
-window.cerrarModalNuevoChat = function () {
-    const modal = document.getElementById('modalNuevoChat');
-    if (modal) modal.classList.add('hidden');
-
-    const resultados = document.getElementById('resultadosUsuarios');
-    if (resultados) resultados.innerHTML = '';
-
-    const input = document.getElementById('buscarUsuario');
-    if (input) input.value = '';
-};
-
-async function buscarUsuarios(query) {
-    const resultados = document.getElementById('resultadosUsuarios');
-    if (!resultados || !query || query.length < 2) {
-        if (resultados) resultados.innerHTML = '';
-        return;
-    }
-
-    resultados.innerHTML = '<div class="spinner" style="margin: 1rem auto;"></div>';
-
-    try {
-        const res = await fetch(`/api/usuarios/buscar?q=${encodeURIComponent(query)}`, {
-            headers: {
-                'Authorization': `Bearer ${window.AuthState.token}`
-            }
-        });
-
-        const usuarios = await res.json();
-
-        if (!res.ok || !Array.isArray(usuarios) || usuarios.length === 0) {
-            resultados.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: 1rem;">No se encontraron usuarios</p>';
-            return;
-        }
-
-        resultados.innerHTML = usuarios
-            .filter(u => u._id !== window.AuthState.user?._id)
-            .map(u => `
-                <div class="flex items-center gap-3 p-3 cursor-pointer" 
-                     style="border-radius: var(--radius-md); transition: background 0.2s;"
-                     onmouseover="this.style.background='var(--gray-100)'"
-                     onmouseout="this.style.background='transparent'"
-                     onclick="iniciarChatCon('${u._id}')">
-                    <img src="${u.foto || '/imgs/default-avatar.svg'}" alt=""
-                         style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                    <div>
-                        <p style="font-weight: 500; margin: 0;">${u.nombre}</p>
-                        <p style="font-size: 0.8rem; color: var(--gray-500); margin: 0;">${u.carrera || ''}</p>
-                    </div>
-                </div>
-            `).join('');
-
-    } catch (err) {
-        console.error("Error buscando usuarios:", err);
-        resultados.innerHTML = '<p style="text-align: center; color: var(--error); padding: 1rem;">Error en la búsqueda</p>';
-    }
-}
-
-window.iniciarChatCon = async function (usuarioId) {
-    try {
-        const res = await fetch('/api/chats', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${window.AuthState.token}`
-            },
-            body: JSON.stringify({ participante_id: usuarioId })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.message || 'Error al crear chat');
-
-        cerrarModalNuevoChat();
-
-        // Recargar chats y abrir el nuevo
-        await cargarChats();
-        const chatId = data._id || data.chat?._id;
-        if (chatId) {
-            const chat = chatsData.find(c => c._id === chatId);
-            if (chat) abrirChat(chat);
-        }
-
-    } catch (err) {
-        console.error("Error iniciando chat:", err);
-        showToast('Error al iniciar conversación', 'error');
-    }
-};
-
-// Opciones del chat
-window.cerrarModalOpciones = function () {
-    const modal = document.getElementById('modalChatOpciones');
-    if (modal) modal.classList.add('hidden');
-};
-
-window.verPerfilUsuario = function () {
-    cerrarModalOpciones();
-    // TODO: Implementar vista de perfil de otro usuario
-    showToast('Función próximamente disponible', 'info');
-};
-
-window.silenciarNotificaciones = function () {
-    cerrarModalOpciones();
-    showToast('Notificaciones silenciadas', 'success');
-};
-
-window.eliminarConversacion = async function () {
-    if (!chatActualId || !confirm('¿Eliminar esta conversación?')) return;
-
-    try {
-        const res = await fetch(`/api/chats/${chatActualId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${window.AuthState.token}`
-            }
-        });
-
-        if (!res.ok) throw new Error('Error al eliminar');
-
-        cerrarModalOpciones();
-        chatActualId = null;
-
-        const chatVacio = document.getElementById('chatVacio');
-        const chatActivo = document.getElementById('chatActivo');
-        if (chatVacio) chatVacio.classList.remove('hidden');
-        if (chatActivo) chatActivo.classList.add('hidden');
-
-        showToast('Conversación eliminada', 'info');
-        cargarChats();
-
-    } catch (err) {
-        console.error("Error eliminando chat:", err);
-        showToast('Error al eliminar la conversación', 'error');
-    }
-};
-
-// Ver imagen completa
-window.verImagenCompleta = function (src) {
-    // Crear modal temporal para ver imagen
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-overlay" onclick="this.parentElement.remove()"></div>
-        <div class="modal-content" style="max-width: 90vw; max-height: 90vh; padding: 0; background: transparent; box-shadow: none;">
-            <img src="${src}" style="max-width: 100%; max-height: 90vh; border-radius: var(--radius-lg);">
-        </div>
-    `;
-    document.body.appendChild(modal);
-};
 
 // Helper para escapar HTML
 function escapeHtml(text) {

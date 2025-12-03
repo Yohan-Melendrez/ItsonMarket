@@ -77,7 +77,7 @@ async function initPerfilUsuario(userId) {
         if (perfilNombre) perfilNombre.textContent = usuario.nombre || 'Usuario';
         if (perfilCorreo) perfilCorreo.textContent = usuario.correo_institucional || '';
         if (perfilCarreraBadge) perfilCarreraBadge.textContent = usuario.carrera || 'Sin carrera';
-        if (statReputacion) statReputacion.textContent = (usuario.reputacion || 5).toFixed(1);
+        if (statReputacion) statReputacion.textContent = Number(usuario.reputacion || 5).toFixed(1);
         if (infoItsonId) infoItsonId.textContent = usuario.itson_id || '-';
         if (infoTelefono) infoTelefono.textContent = usuario.telefono || '-';
         if (infoCarrera) infoCarrera.textContent = getCarreraNombre(usuario.carrera) || '-';
@@ -227,7 +227,7 @@ async function initPerfil() {
         if (perfilNombre) perfilNombre.textContent = usuario.nombre || 'Usuario';
         if (perfilCorreo) perfilCorreo.textContent = usuario.correo_institucional || '';
         if (perfilCarreraBadge) perfilCarreraBadge.textContent = usuario.carrera || 'Sin carrera';
-        if (statReputacion) statReputacion.textContent = (usuario.reputacion || 5).toFixed(1);
+        if (statReputacion) statReputacion.textContent = Number(usuario.reputacion || 5).toFixed(1);
         if (infoItsonId) infoItsonId.textContent = usuario.itson_id || '-';
         if (infoTelefono) infoTelefono.textContent = usuario.telefono || '-';
         if (infoCarrera) infoCarrera.textContent = getCarreraNombre(usuario.carrera) || '-';

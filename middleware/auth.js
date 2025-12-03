@@ -16,12 +16,17 @@ const authMiddleware = (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'clave_secreta_itson');
       
+      // Manejar diferentes formatos de payload del token
       const payload = decoded.user || decoded;
 
-      if (payload.sub && !payload.id) {
-          payload.id = payload.sub;
-          payload._id = payload.sub; 
+      // Normalizar el ID del usuario - puede venir como sub, userId, id, o _id
+      const usuarioId = payload.sub || payload.userId || payload.id || payload._id;
+      
+      if (usuarioId) {
+        payload.id = usuarioId;
+        payload._id = usuarioId;
       }
+      
       req.user = payload;
       next();
     } catch (jwtError) {
