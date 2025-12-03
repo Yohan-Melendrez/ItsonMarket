@@ -13,6 +13,11 @@ function initLogin() {
         return;
     }
 
+    if (form.dataset.initialized === 'true') {
+        return;
+    }
+    form.dataset.initialized = 'true';
+
     function showError(el, msg) {
         if (!el) return;
         el.textContent = msg;

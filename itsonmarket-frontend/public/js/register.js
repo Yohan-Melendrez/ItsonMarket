@@ -4,6 +4,11 @@ function initRegister() {
         return;
     }
 
+    if (form.dataset.initialized === 'true') {
+        return;
+    }
+    form.dataset.initialized = 'true';
+
     const fields = {
         itsonId: document.getElementById("itsonId"),
         nombre: document.getElementById("nombre"),
