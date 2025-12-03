@@ -38,6 +38,11 @@ const routes = {
     script: "/js/publicaciones.js",
     requiresAuth: true,
   },
+  "/publicaciones/editar/:id": {
+    view: "/views/publicaciones/crear.html",
+    script: "/js/publicaciones.js",
+    requiresAuth: true,
+  },
   "/publicaciones/:id": {
     view: "/views/publicaciones/detalle.html",
     script: "/js/publicaciones.js",

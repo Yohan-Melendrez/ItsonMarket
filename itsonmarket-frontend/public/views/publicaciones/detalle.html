@@ -160,12 +160,15 @@
                 <div id="ventaError" class="hidden" style="padding: 0.75rem; background: var(--error-light, #fee2e2); border-radius: var(--radius-md); margin-bottom: 1rem; color: var(--error);">
                 </div>
 
-                <button type="submit" class="btn btn-success" style="width: 100%;" id="btnConfirmarVenta">
-                    <span id="btnVentaTexto">Confirmar Venta</span>
-                    <span id="btnVentaLoading" class="hidden">
-                        <div class="spinner spinner-sm"></div>
-                    </span>
-                </button>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="cerrarModalVenta()">Cancelar</button>
+                    <button type="submit" class="btn btn-success" style="flex: 1;" id="btnConfirmarVenta">
+                        <span id="btnVentaTexto">Confirmar Venta</span>
+                        <span id="btnVentaLoading" class="hidden">
+                            <div class="spinner spinner-sm"></div>
+                        </span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>

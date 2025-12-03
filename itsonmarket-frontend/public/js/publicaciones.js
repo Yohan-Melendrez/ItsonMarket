@@ -23,6 +23,9 @@ function initPublicaciones() {
         initListaPublicaciones();
     } else if (path === '/publicaciones/crear') {
         initCrearPublicacion();
+    } else if (path.startsWith('/publicaciones/editar')) {
+        // Ruta de edición reutiliza el formulario de creación
+        initCrearPublicacion();
     } else if (path.startsWith('/publicaciones/')) {
         initDetallePublicacion();
     }
@@ -255,6 +258,64 @@ function initCrearPublicacion() {
     const descripcionCount = document.getElementById("descripcionCount");
 
     let imagenesBase64 = [];
+    // Si venimos a editar, routeParams puede contener el id
+    const editarId = window.routeParams?.id;
+    let isEditing = false;
+
+    // Si es edición, cargar publicación y prellenar formulario
+    if (editarId) {
+        isEditing = true;
+        // Cargar publicación
+        (async function cargarParaEditar() {
+            try {
+                const headers = {};
+                if (window.AuthState?.token) headers['Authorization'] = `Bearer ${window.AuthState.token}`;
+                const res = await fetch(`/api/publicaciones/${editarId}`, { headers });
+                const pub = await res.json();
+                if (!res.ok) throw new Error(pub.message || 'No se pudo cargar la publicación');
+
+                // Prefill campos
+                document.getElementById('titulo').value = pub.titulo || '';
+                document.getElementById('descripcion').value = pub.descripcion || '';
+                if (pub.categoria) document.getElementById('categoria').value = pub.categoria;
+                if (pub.precio !== undefined && document.getElementById('precio')) document.getElementById('precio').value = pub.precio;
+
+                // Tipo
+                if (pub.tipo_publicacion === 'servicio') {
+                    const tipoServicio = document.getElementById('tipoServicio');
+                    if (tipoServicio) tipoServicio.checked = true;
+                } else {
+                    const tipoProducto = document.getElementById('tipoProducto');
+                    if (tipoProducto) tipoProducto.checked = true;
+                }
+
+                // Campos adicionales
+                const detalles = pub.detalles || {};
+                if (detalles.marca) document.getElementById('marca').value = detalles.marca;
+                if (detalles.edicion) document.getElementById('edicion').value = detalles.edicion;
+                if (detalles.modalidad) document.getElementById('modalidad').value = detalles.modalidad;
+                if (detalles.experiencia) document.getElementById('experiencia').value = detalles.experiencia;
+                if (detalles.duracion) document.getElementById('duracion').value = detalles.duracion;
+                if (detalles.unidad_tarifa) document.getElementById('unidad_tarifa').value = detalles.unidad_tarifa;
+
+                // Imágenes existentes (pueden ser URLs)
+                imagenesBase64 = Array.isArray(detalles.imagenes) ? detalles.imagenes.slice() : [];
+                renderImagePreviews();
+
+                // Actualizar estilos según tipo
+                updateTipoStyles();
+
+                // Cambiar texto del botón
+                const btnTexto = document.getElementById('btnPublicarText');
+                if (btnTexto) btnTexto.textContent = 'Guardar cambios';
+
+            } catch (err) {
+                console.error('Error cargando publicación para editar:', err);
+                showToast(err.message || 'No se pudo cargar la publicación', 'error');
+                navigateTo('/publicaciones');
+            }
+        })();
+    }
 
     // Contador de caracteres
     if (tituloInput && tituloCount) {
@@ -365,7 +426,7 @@ function initCrearPublicacion() {
         renderImagePreviews();
     };
 
-    // Submit form
+    // Submit form (crear o editar)
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -435,27 +496,44 @@ function initCrearPublicacion() {
         if (btnLoading) btnLoading.classList.remove("hidden");
 
         try {
-            const res = await fetch("/api/publicaciones", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${window.AuthState.token}`
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await res.json();
-
-            if (!res.ok) {
-                throw new Error(result.message || result.error || "Error al crear publicación");
+            let res, result;
+            if (isEditing && editarId) {
+                // Editar publicación existente
+                res = await fetch(`/api/publicaciones/${editarId}`, {
+                    method: "PUT",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${window.AuthState.token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                result = await res.json();
+                if (!res.ok) {
+                    throw new Error(result.message || result.error || "Error al actualizar publicación");
+                }
+                showToast('¡Publicación actualizada!', 'success');
+                navigateTo(`/publicaciones/${editarId}`);
+            } else {
+                // Crear nueva publicación
+                res = await fetch("/api/publicaciones", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${window.AuthState.token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                result = await res.json();
+                if (!res.ok) {
+                    throw new Error(result.message || result.error || "Error al crear publicación");
+                }
+                showToast('¡Publicación creada exitosamente!', 'success');
+                navigateTo('/publicaciones');
             }
 
-            showToast('¡Publicación creada exitosamente!', 'success');
-            navigateTo('/publicaciones');
-
         } catch (err) {
-            console.error("Error creando publicación:", err);
-            showToast(err.message || 'Error al crear la publicación', 'error');
+            console.error(isEditing ? "Error actualizando publicación:" : "Error creando publicación:", err);
+            showToast(err.message || (isEditing ? 'Error al actualizar la publicación' : 'Error al crear la publicación'), 'error');
             if (btn) btn.disabled = false;
             if (btnTexto) btnTexto.classList.remove("hidden");
             if (btnLoading) btnLoading.classList.add("hidden");
@@ -647,10 +725,14 @@ function abrirModalVenta() {
     if (modal) {
         modal.classList.remove("hidden");
         // Limpiar campos
-        document.getElementById("compradorItsonId").value = '';
-        document.getElementById("infoComprador").classList.add("hidden");
-        document.getElementById("infoCompradorNoRegistrado").classList.add("hidden");
-        document.getElementById("ventaError").classList.add("hidden");
+        const input = document.getElementById("compradorItsonId");
+        if (input) input.value = '';
+        const infoCompradorEl = document.getElementById("infoComprador");
+        if (infoCompradorEl) infoCompradorEl.classList.add("hidden");
+        const infoNoRegEl = document.getElementById("infoCompradorNoRegistrado");
+        if (infoNoRegEl) infoNoRegEl.classList.add("hidden");
+        const ventaErrorEl = document.getElementById("ventaError");
+        if (ventaErrorEl) ventaErrorEl.classList.add("hidden");
     }
 }
 

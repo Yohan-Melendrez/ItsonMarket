@@ -352,14 +352,21 @@ async function cargarMisResenas() {
     container.innerHTML = '<div class="spinner" style="margin: 2rem auto;"></div>';
 
     try {
-        const res = await fetch(`/api/usuarios/${userId}/resenas`, {
-            headers: {
-                'Authorization': `Bearer ${window.AuthState.token}`
-            }
-        });
+        // Obtener transacciones donde este usuario fue vendedor y extraer calificaciones
+        const headers = {};
+        if (window.AuthState?.token) headers['Authorization'] = `Bearer ${window.AuthState.token}`;
 
-        const data = await res.json();
-        const resenas = Array.isArray(data) ? data : [];
+        const res = await fetch(`/api/transacciones?vendedor_id=${userId}`, { headers });
+        const payload = await res.json();
+        const transacciones = Array.isArray(payload.data) ? payload.data : (Array.isArray(payload) ? payload : []);
+
+        // Filtrar solo transacciones que tengan calificacion
+        const resenas = transacciones.filter(t => t.calificacion && t.calificacion.puntuacion).map(t => ({
+            autor: t.comprador_id || { nombre: t.comprador_itson_id },
+            calificacion: t.calificacion.puntuacion,
+            comentario: t.calificacion.comentario,
+            fecha: t.calificacion.fecha || t.fecha_transaccion
+        }));
 
         if (resenas.length === 0) {
             container.innerHTML = '';
@@ -376,7 +383,7 @@ async function cargarMisResenas() {
                          style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
                     <div style="flex: 1;">
                         <div class="flex items-center justify-between">
-                            <h4 style="margin: 0;">${r.autor?.nombre || 'Usuario'}</h4>
+                            <h4 style="margin: 0;">${r.autor?.nombre || r.autor?.itson_id || 'Usuario'}</h4>
                             <div class="flex items-center gap-1" style="color: var(--warning);">
                                 ${Array(5).fill(0).map((_, i) => `
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 

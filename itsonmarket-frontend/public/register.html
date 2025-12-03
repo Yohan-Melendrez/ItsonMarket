@@ -2,65 +2,59 @@
     <div class="auth-card-itson" style="max-width: 550px;">
         <!-- Logo -->
         <img src="/imgs/ItsonMarket.png" alt="ITSON Market" class="auth-logo-itson" />
-        
+
         <h2 class="auth-subtitle-itson">CREAR CUENTA</h2>
 
         <form id="registerForm" novalidate>
             <!-- ITSON ID -->
             <div class="form-group">
-                <input 
-                    type="text" 
-                    id="itsonId" 
-                    class="form-input-itson" 
-                    placeholder="ID ITSON (11 dígitos)"
-                    maxlength="11"
-                    inputmode="numeric"
-                />
+                <input type="text" id="itsonId" class="form-input-itson" placeholder="ID ITSON (11 dígitos)"
+                    maxlength="11" inputmode="numeric" />
                 <p id="err-itsonId" class="form-error"></p>
             </div>
 
             <!-- Nombre -->
             <div class="form-group">
-                <input 
-                    type="text" 
-                    id="nombre" 
-                    class="form-input-itson" 
-                    placeholder="Nombre completo"
-                />
+                <input type="text" id="nombre" class="form-input-itson" placeholder="Nombre completo" />
                 <p id="err-nombre" class="form-error"></p>
             </div>
 
             <!-- Correo -->
             <div class="form-group">
-                <input 
-                    type="email" 
-                    id="correo" 
-                    class="form-input-itson" 
-                    placeholder="Correo institucional"
-                />
+                <input type="email" id="correo" class="form-input-itson" placeholder="Correo institucional" />
                 <p id="err-correo" class="form-error"></p>
             </div>
 
             <!-- Contraseñas en fila -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <input 
-                        type="password" 
-                        id="pass1" 
-                        class="form-input-itson" 
-                        placeholder="Contraseña"
-                        style="text-align: left; padding-left: 1rem;"
-                    />
+
+                    <div class="input-wrapper">
+                        <input type="password" id="pass1" class="form-input-itson" placeholder="Contraseña" />
+
+                        <button type="button" class="btn-ojo" onclick="togglePassword('pass1', this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.454 10.454 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                            </svg>
+                        </button>
+                    </div>
+
                     <p id="err-pass1" class="form-error"></p>
                 </div>
+
                 <div class="form-group">
-                    <input 
-                        type="password" 
-                        id="pass2" 
-                        class="form-input-itson" 
-                        placeholder="Confirmar contraseña"
-                        style="text-align: left; padding-left: 1rem;"
-                    />
+                    <div class="input-wrapper">
+                        <input type="password" id="pass2" class="form-input-itson" placeholder="Confirmar contraseña" />
+                        <button type="button" class="btn-ojo" onclick="togglePassword('pass2', this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.454 10.454 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                            </svg>
+                        </button>
+                    </div>
                     <p id="err-pass2" class="form-error"></p>
                 </div>
             </div>
@@ -84,15 +78,8 @@
                     <p id="err-carrera" class="form-error"></p>
                 </div>
                 <div class="form-group">
-                    <input 
-                        type="tel" 
-                        id="telefono" 
-                        class="form-input-itson" 
-                        placeholder="Teléfono (10 dígitos)"
-                        maxlength="10"
-                        inputmode="numeric"
-                        style="text-align: left; padding-left: 1rem;"
-                    />
+                    <input type="tel" id="telefono" class="form-input-itson" placeholder="Teléfono (10 dígitos)"
+                        maxlength="10" inputmode="numeric" style="text-align: left; padding-left: 1rem;" />
                     <p id="err-telefono" class="form-error"></p>
                 </div>
             </div>
@@ -100,15 +87,21 @@
             <!-- Foto de Perfil -->
             <div class="form-group">
                 <div class="form-file-upload-itson" id="dropArea">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: #1565C0;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" style="color: #1565C0;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span style="color: #1565C0;">Foto de perfil (opcional)</span>
                 </div>
                 <input type="file" id="fileInput" accept="image/*" style="display: none;" />
-                <div id="previewContainer" class="hidden" style="margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 1rem;">
-                    <img id="preview" alt="Preview" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" />
-                    <button type="button" id="removeImage" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.9rem;">✕ Eliminar</button>
+                <div id="previewContainer" class="hidden"
+                    style="margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                    <img id="preview" alt="Preview"
+                        style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" />
+                    <button type="button" id="removeImage"
+                        style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.9rem;">✕
+                        Eliminar</button>
                 </div>
             </div>
 
