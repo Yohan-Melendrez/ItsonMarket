@@ -8,19 +8,27 @@ class ChatRepository {
   }
 
   async findAll() {
-    return ChatModel.find({});
+    return ChatModel.find({}).populate('participantes', 'nombre foto carrera');
   }
 
   async findById(id) {
-    return ChatModel.findById(id);
+    return ChatModel.findById(id).populate('participantes', 'nombre foto carrera');
   }
 
   async findByParticipante(usuario_id) {
-    return ChatModel.find({ participantes: usuario_id });
+    return ChatModel.find({ participantes: usuario_id }).populate('participantes', 'nombre foto carrera');
+  }
+
+  async findByParticipants(participantes) {
+    // Buscar un chat que contenga exactamente estos participantes (en cualquier orden)
+    return ChatModel.findOne({
+      participantes: { $all: participantes },
+      $expr: { $eq: [{ $size: "$participantes" }, participantes.length] }
+    }).populate('participantes', 'nombre foto carrera');
   }
 
   async findByPublicacion(publicacion_id) {
-    return ChatModel.find({ publicacion_id });
+    return ChatModel.find({ publicacion_id }).populate('participantes', 'nombre foto carrera');
   }
 
   async update(id, updateData) {
@@ -41,12 +49,19 @@ class ChatRepository {
     return chat;
   }
 
+  async obtenerMensajes(chatId) {
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) return null;
+    return chat.mensajes || [];
+  }
+
   async marcarMensajesLeidos(chatId, usuarioId) {
     const chat = await ChatModel.findById(chatId);
     if (!chat) return null;
 
     chat.mensajes.forEach((msg) => {
-      if (msg.remitente_id.toString() !== usuarioId.toString()) {
+      const emisorId = msg.emisor_id || msg.remitente_id;
+      if (emisorId && emisorId.toString() !== usuarioId.toString()) {
         msg.leido = true;
       }
     });

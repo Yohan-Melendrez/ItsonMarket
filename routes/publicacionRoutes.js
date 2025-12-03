@@ -5,38 +5,40 @@ const router = express.Router();
 const controller = require('../controllers/publicacionController');
 const authMiddleware = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
-const v = require('../validators/publicacionValidator'); // <- usamos las claves: list, create, etc.
+const v = require('../validators/publicacionValidator');
 
-// Todas las rutas privadas
-router.use(authMiddleware);
+// ========== RUTAS PÚBLICAS (sin autenticación) ==========
 
 /**
  * @route GET /api/publicaciones
  * @desc Listar publicaciones con filtros + paginación
- * @access Private
+ * @access Public
  */
 router.get('/', v.list, handleValidationErrors, controller.list);
 
 /**
  * @route GET /api/publicaciones/buscar
  * @desc Buscar por título (q) con filtros opcionales
- * @access Private
+ * @access Public
  */
 router.get('/buscar', v.searchByTitle, handleValidationErrors, controller.searchByTitle);
 
 /**
  * @route GET /api/publicaciones/vendedor/:vendedorId
  * @desc Listar publicaciones por vendedor
- * @access Private
+ * @access Public
  */
 router.get('/vendedor/:vendedorId', v.listBySeller, handleValidationErrors, controller.listBySeller);
 
 /**
  * @route GET /api/publicaciones/:id
  * @desc Obtener publicación por ID
- * @access Private
+ * @access Public
  */
 router.get('/:id', v.getById, handleValidationErrors, controller.getById);
+
+// ========== RUTAS PRIVADAS (requieren autenticación) ==========
+router.use(authMiddleware);
 
 /**
  * @route POST /api/publicaciones

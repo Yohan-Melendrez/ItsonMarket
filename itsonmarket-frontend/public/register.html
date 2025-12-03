@@ -1,114 +1,139 @@
-<section class="min-h-screen bg-gradient-to-br from-blue-300 to-blue-600 flex justify-center items-center py-8">
-  <div class="bg-white shadow-2xl p-10 rounded-2xl w-full max-w-3xl">
+<section class="auth-page-itson" style="padding: 2rem 1rem;">
+    <div class="auth-card-itson" style="max-width: 550px;">
+        <!-- Logo -->
+        <img src="/imgs/ItsonMarket.png" alt="ITSON Market" class="auth-logo-itson" />
+        
+        <h2 class="auth-subtitle-itson">CREAR CUENTA</h2>
 
-    <a href="#/login" class="inline-flex items-center mb-4">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600 hover:text-blue-800 transition" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-    </a>
+        <form id="registerForm" novalidate>
+            <!-- ITSON ID -->
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    id="itsonId" 
+                    class="form-input-itson" 
+                    placeholder="ID ITSON (11 dígitos)"
+                    maxlength="11"
+                    inputmode="numeric"
+                />
+                <p id="err-itsonId" class="form-error"></p>
+            </div>
 
-    <img src="/imgs/logo-itson.jpg" class="h-16 mb-4" />
+            <!-- Nombre -->
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    id="nombre" 
+                    class="form-input-itson" 
+                    placeholder="Nombre completo"
+                />
+                <p id="err-nombre" class="form-error"></p>
+            </div>
 
-    <h1 class="text-3xl font-bold mb-1">Crear Cuenta</h1>
-    <p class="text-gray-600 mb-8">Únete a la comunidad ITSONMarket</p>
+            <!-- Correo -->
+            <div class="form-group">
+                <input 
+                    type="email" 
+                    id="correo" 
+                    class="form-input-itson" 
+                    placeholder="Correo institucional"
+                />
+                <p id="err-correo" class="form-error"></p>
+            </div>
 
-    <form id="registerForm" class="grid grid-cols-2 gap-6" novalidate>
+            <!-- Contraseñas en fila -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <input 
+                        type="password" 
+                        id="pass1" 
+                        class="form-input-itson" 
+                        placeholder="Contraseña"
+                        style="text-align: left; padding-left: 1rem;"
+                    />
+                    <p id="err-pass1" class="form-error"></p>
+                </div>
+                <div class="form-group">
+                    <input 
+                        type="password" 
+                        id="pass2" 
+                        class="form-input-itson" 
+                        placeholder="Confirmar contraseña"
+                        style="text-align: left; padding-left: 1rem;"
+                    />
+                    <p id="err-pass2" class="form-error"></p>
+                </div>
+            </div>
 
-      <!-- ITSON ID -->
-      <div class="col-span-2">
-        <label class="font-medium text-sm">ITSON ID*</label>
-        <input id="itsonId" type="text" placeholder="00000247037"
-          class="w-full border rounded-lg px-3 py-2 mt-1"
-          inputmode="numeric" maxlength="11"
-          oninput="this.value = this.value.replace(/\D/g, '').slice(0,11);" />
-        <p id="err-itsonId" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
-      </div>
+            <!-- Carrera y Teléfono en fila -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <select id="carrera" class="form-input-itson" style="text-align: left; padding-left: 1rem;">
+                        <option value="">Selecciona carrera</option>
+                        <option value="ISW">Ingeniería en Software</option>
+                        <option value="IIN">Ingeniería Industrial</option>
+                        <option value="ISC">Ing. Sistemas Computacionales</option>
+                        <option value="IEL">Ingeniería Eléctrica</option>
+                        <option value="ICI">Ingeniería Civil</option>
+                        <option value="LAD">Lic. en Administración</option>
+                        <option value="LCO">Lic. en Contaduría</option>
+                        <option value="LPS">Lic. en Psicología</option>
+                        <option value="LDG">Lic. en Diseño Gráfico</option>
+                        <option value="Otra">Otra</option>
+                    </select>
+                    <p id="err-carrera" class="form-error"></p>
+                </div>
+                <div class="form-group">
+                    <input 
+                        type="tel" 
+                        id="telefono" 
+                        class="form-input-itson" 
+                        placeholder="Teléfono (10 dígitos)"
+                        maxlength="10"
+                        inputmode="numeric"
+                        style="text-align: left; padding-left: 1rem;"
+                    />
+                    <p id="err-telefono" class="form-error"></p>
+                </div>
+            </div>
 
-      <!-- Nombre -->
-      <div>
-        <label class="font-medium text-sm">Nombre Completo*</label>
-        <input id="nombre" type="text" placeholder="Juan Pérez García"
-          class="w-full border rounded-lg px-3 py-2 mt-1" />
-        <p id="err-nombre" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
-      </div>
+            <!-- Foto de Perfil -->
+            <div class="form-group">
+                <div class="form-file-upload-itson" id="dropArea">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: #1565C0;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span style="color: #1565C0;">Foto de perfil (opcional)</span>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+                <div id="previewContainer" class="hidden" style="margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                    <img id="preview" alt="Preview" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" />
+                    <button type="button" id="removeImage" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.9rem;">✕ Eliminar</button>
+                </div>
+            </div>
 
-      <!-- Correo -->
-      <div>
-        <label class="font-medium text-sm">Correo Institucional*</label>
-        <input id="correo" type="email" placeholder="ejemplo@potros.itson.edu.mx"
-          class="w-full border rounded-lg px-3 py-2 mt-1" />
-        <p id="err-correo" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
-      </div>
+            <!-- Términos -->
+            <div class="form-group" style="text-align: center;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.85rem; color: var(--gray-600); cursor: pointer;">
+                    <input type="checkbox" id="terminos" style="accent-color: #1565C0;" />
+                    <span>Acepto los <a href="#" style="color: #1565C0;">términos</a> y <a href="#" style="color: #1565C0;">privacidad</a></span>
+                </label>
+                <p id="err-terminos" class="form-error"></p>
+            </div>
 
-      <!-- Contraseña -->
-      <div>
-        <label class="font-medium text-sm">Contraseña*</label>
-        <input id="pass1" type="password"
-          class="w-full border rounded-lg px-3 py-2 mt-1" />
-        <p id="err-pass1" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
-      </div>
+            <!-- Botón Submit -->
+            <button type="submit" id="btnRegister" class="btn-itson-primary" disabled>
+                <span id="btnRegisterText">REGISTRARSE</span>
+                <span id="btnRegisterLoader" class="loader hidden"></span>
+            </button>
+        </form>
 
-      <!-- Confirmar contraseña -->
-      <div>
-        <label class="font-medium text-sm">Confirmar Contraseña*</label>
-        <input id="pass2" type="password"
-          class="w-full border rounded-lg px-3 py-2 mt-1" />
-        <p id="err-pass2" class="text-red-600 text-xs mt-1 hidden" style="display:none"></p>
-      </div>
+        <a href="#/login" class="link-itson">
+            ¿Ya tienes cuenta? Inicia sesión
+        </a>
 
-      <!-- Carrera -->
-      <div>
-        <label class="font-medium text-sm">Carrera*</label>
-        <select id="carrera" class="w-full border rounded-lg px-3 py-2 mt-1">
-          <option value="">Selecciona una opción</option>
-          <option>Ingeniería en Software</option>
-          <option>Ingeniería Industrial</option>
-          <option>Ingeniería en Sistemas</option>
-          <option>Administración</option>
-          <option>Contaduría</option>
-        </select>
-        <p id="err-carrera" class="text-red-600 text-xs mt-1 hidden"style="display:none"></p>
-      </div>
-
-      <!-- Teléfono -->
-      <div>
-        <label class="font-medium text-sm">Teléfono*</label>
-        <input id="telefono" type="text" placeholder="6441234567"
-          class="w-full border rounded-lg px-3 py-2 mt-1"
-          inputmode="numeric" maxlength="10"
-          oninput="this.value = this.value.replace(/\D/g, '').slice(0,10);" />
-        <p id="err-telefono" class="text-red-600 text-xs mt-1 hidden"style="display:none"></p>
-      </div>
-
-      <!-- Foto -->
-      <div class="col-span-2">
-        <label class="font-medium text-sm">Foto de perfil (opcional)</label>
-        <div id="dropArea"
-          class="w-full h-32 border-2 border-dashed rounded-lg flex items-center justify-center text-gray-500 mt-2">
-          Haz clic o arrastra una imagen
-        </div>
-        <input type="file" id="fileInput" class="hidden" accept="image/*" />
-        <img id="preview" class="h-24 mt-3 rounded-full hidden" />
-      </div>
-
-      <!-- Términos -->
-      <div class="col-span-2 flex items-start mt-2 gap-2">
-        <input id="terminos" type="checkbox" class="mt-1">
-        <p class="text-xs text-gray-600">
-          Acepto los términos de servicio y políticas.
-        </p>
-      </div>
-      <p id="err-terminos" class="text-red-600 text-xs mt-1 hidden col-span-2" style="display:none"></p>
-
-      <!-- Botón -->
-      <div class="col-span-2 mt-4">
-        <button id="btnRegister" disabled
-          class="w-full bg-blue-700 text-white py-3 rounded-lg font-semibold opacity-50 cursor-not-allowed">
-          Crear Cuenta
-        </button>
-      </div>
-
-    </form>
-  </div>
+        <a href="#/publicaciones" class="link-itson-secondary">
+            Explorar sin cuenta →
+        </a>
+    </div>
 </section>

@@ -1,0 +1,193 @@
+<div class="main-content">
+    <div class="container container-sm">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 mb-6" style="color: var(--gray-500); font-size: 0.9rem;">
+            <a href="#/perfil" style="color: var(--primary); text-decoration: none;">Mi Perfil</a>
+            <span>/</span>
+            <span>Editar</span>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <!-- Header -->
+            <div style="background: var(--gradient-primary); padding: 2rem; text-align: center;">
+                <div style="position: relative; display: inline-block;">
+                    <img id="avatarPreview" src="/imgs/default-avatar.svg" alt="Avatar" 
+                         style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: var(--shadow-lg);">
+                    <label for="avatarInput" class="btn btn-icon" 
+                           style="position: absolute; bottom: 0; right: 0; background: white; box-shadow: var(--shadow-md); cursor: pointer;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--primary)">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </label>
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                </div>
+                <h2 style="color: white; margin: 1rem 0 0.25rem;">Editar Perfil</h2>
+                <p style="color: rgba(255,255,255,0.8); margin: 0;">Actualiza tu información personal</p>
+            </div>
+
+            <!-- Form -->
+            <form id="editarPerfilForm" style="padding: 2rem;">
+                <div id="editarError" class="alert alert-error hidden" style="margin-bottom: 1.5rem;"></div>
+                <div id="editarSuccess" class="alert alert-success hidden" style="margin-bottom: 1.5rem;"></div>
+
+                <div class="form-group">
+                    <label for="editNombre" class="form-label">Nombre completo</label>
+                    <input type="text" id="editNombre" class="form-input" placeholder="Tu nombre completo" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="editItsonId" class="form-label">ITSON ID</label>
+                        <input type="text" id="editItsonId" class="form-input" disabled 
+                               style="background: var(--gray-100); cursor: not-allowed;">
+                        <span style="font-size: 0.75rem; color: var(--gray-500);">El ID no puede modificarse</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTelefono" class="form-label">Teléfono</label>
+                        <input type="tel" id="editTelefono" class="form-input" placeholder="6441234567" pattern="[0-9]{10}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editCorreo" class="form-label">Correo institucional</label>
+                    <input type="email" id="editCorreo" class="form-input" disabled
+                           style="background: var(--gray-100); cursor: not-allowed;">
+                    <span style="font-size: 0.75rem; color: var(--gray-500);">El correo no puede modificarse</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="editCarrera" class="form-label">Carrera</label>
+                    <select id="editCarrera" class="form-input" required>
+                        <option value="">Selecciona tu carrera</option>
+                        <option value="ISW">Ingeniería en Software</option>
+                        <option value="ICI">Ingeniería Civil</option>
+                        <option value="IEL">Ingeniería Eléctrica</option>
+                        <option value="IME">Ingeniería Mecánica</option>
+                        <option value="IIN">Ingeniería Industrial</option>
+                        <option value="IBQ">Ingeniería Bioquímica</option>
+                        <option value="LAE">Licenciatura en Administración de Empresas</option>
+                        <option value="LCP">Licenciatura en Contaduría Pública</option>
+                        <option value="LDG">Licenciatura en Diseño Gráfico</option>
+                        <option value="LEN">Licenciatura en Enfermería</option>
+                        <option value="LPS">Licenciatura en Psicología</option>
+                        <option value="LED">Licenciatura en Educación</option>
+                        <option value="Otra">Otra</option>
+                    </select>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--gray-200);">
+
+                <h3 style="margin-bottom: 1rem;">Cambiar contraseña</h3>
+                <p style="font-size: 0.9rem; color: var(--gray-500); margin-bottom: 1.5rem;">
+                    Deja estos campos vacíos si no deseas cambiar tu contraseña.
+                </p>
+
+                <div class="form-group">
+                    <label for="editPasswordActual" class="form-label">Contraseña actual</label>
+                    <div class="password-input">
+                        <input type="password" id="editPasswordActual" class="form-input" placeholder="Tu contraseña actual">
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('editPasswordActual', this)">
+                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="editPasswordNueva" class="form-label">Nueva contraseña</label>
+                        <div class="password-input">
+                            <input type="password" id="editPasswordNueva" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6">
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('editPasswordNueva', this)">
+                                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPasswordConfirmar" class="form-label">Confirmar contraseña</label>
+                        <div class="password-input">
+                            <input type="password" id="editPasswordConfirmar" class="form-input" placeholder="Repite la contraseña" minlength="6">
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('editPasswordConfirmar', this)">
+                                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--gray-200);">
+
+                <!-- Botones -->
+                <div class="flex gap-4">
+                    <a href="#/perfil" class="btn btn-outline" style="flex: 1;">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="btnGuardar" style="flex: 2;">
+                        <span id="btnGuardarTexto">Guardar cambios</span>
+                        <span id="btnGuardarLoading" class="hidden">
+                            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Guardando...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Zona de peligro -->
+        <div class="card mt-6" style="border: 2px solid var(--error); padding: 1.5rem;">
+            <h3 style="color: var(--error); margin-bottom: 0.5rem;">Zona de peligro</h3>
+            <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">
+                Una vez eliminada tu cuenta, no hay vuelta atrás. Por favor, asegúrate de estar seguro.
+            </p>
+            <button type="button" id="btnEliminarCuenta" class="btn" 
+                    style="background: transparent; color: var(--error); border: 1px solid var(--error);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar mi cuenta
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal confirmar eliminación -->
+<div id="modalEliminar" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 400px;">
+        <div style="text-align: center; padding: 1rem;">
+            <div style="width: 60px; height: 60px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="var(--error)">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 style="margin-bottom: 0.5rem;">¿Eliminar cuenta?</h3>
+            <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+                Esta acción eliminará permanentemente tu cuenta, publicaciones y toda tu información. No se puede deshacer.
+            </p>
+            <div class="form-group" style="text-align: left;">
+                <label class="form-label">Escribe "ELIMINAR" para confirmar</label>
+                <input type="text" id="confirmarEliminar" class="form-input" placeholder="ELIMINAR">
+            </div>
+            <div class="flex gap-3 mt-4">
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="cerrarModalEliminar()">
+                    Cancelar
+                </button>
+                <button type="button" id="btnConfirmarEliminar" class="btn" 
+                        style="flex: 1; background: var(--error); color: white;" disabled>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -8,6 +8,18 @@ class UsuarioRepository {
         return usuario.save();
     }
 
+    async findById(id) {
+        return UsuarioModel.findById(id);
+    }
+
+    async updateById(id, updateData) {
+        return UsuarioModel.findByIdAndUpdate(id, updateData, { new: true });
+    }
+
+    async deleteById(id) {
+        return UsuarioModel.findByIdAndDelete(id);
+    }
+
     async updateByItsonId(itsonId, updateData) {
         if (updateData.contrasena) {
             updateData.contrasena = await bcrypt.hash(updateData.contrasena, 10);
@@ -21,7 +33,7 @@ class UsuarioRepository {
     }
 
     async findAll() {
-        return UsuarioModel.find({});
+        return UsuarioModel.find({}).select('-contrasena');
     }
 
     async findByName(nombre) {
@@ -32,11 +44,15 @@ class UsuarioRepository {
         return UsuarioModel.findOne({ itson_id: itson_id });
     }
 
+    async searchByName(query) {
+        return UsuarioModel.find({
+            nombre: { $regex: query, $options: 'i' }
+        }).select('_id nombre correo_institucional carrera foto').limit(10);
+    }
+
     async update(id, updateData) {
         return UsuarioModel.findByIdAndUpdate(id, updateData, { new: true });
     }
-
-
 
     async delete(id) {
         return UsuarioModel.findByIdAndDelete(id);

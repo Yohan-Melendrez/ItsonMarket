@@ -1,0 +1,92 @@
+<div class="main-content">
+    <div class="container" style="max-width: 800px;">
+        <!-- Loading -->
+        <div id="loadingState" class="text-center p-8">
+            <div class="loader loader-lg"></div>
+            <p class="mt-4 text-muted">Cargando publicación...</p>
+        </div>
+
+        <!-- Contenido principal -->
+        <div id="detalleContent" class="hidden">
+            <!-- Volver -->
+            <a href="#/publicaciones" class="flex items-center gap-2 mb-4" style="color: var(--gray-500); text-decoration: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Volver a publicaciones
+            </a>
+
+            <!-- Card principal -->
+            <div class="card" style="overflow: hidden;">
+                <!-- Imagen -->
+                <div style="background: var(--gray-100); display: flex; align-items: center; justify-content: center; min-height: 280px; max-height: 350px;">
+                    <img id="mainImage" src="/imgs/default-product.svg" alt="Imagen" 
+                         style="max-width: 100%; max-height: 350px; object-fit: contain;" />
+                </div>
+
+                <!-- Thumbnails -->
+                <div id="thumbnails" class="flex gap-2 p-3" style="background: var(--gray-50); overflow-x: auto;">
+                </div>
+
+                <!-- Info -->
+                <div style="padding: 1.5rem;">
+                    <!-- Badge y categoría -->
+                    <div class="flex items-center gap-2 mb-2">
+                        <span id="tipoBadge" class="badge badge-primary">Producto</span>
+                        <span style="color: var(--gray-400);">•</span>
+                        <span id="detalleCategoria" style="color: var(--gray-500); font-size: 0.9rem;"></span>
+                    </div>
+                    
+                    <!-- Título -->
+                    <h1 id="detalleTitulo" style="font-size: 1.4rem; margin-bottom: 0.25rem;"></h1>
+                    <p id="detalleVistas" style="color: var(--gray-500); font-size: 0.85rem; margin-bottom: 1rem;"></p>
+
+                    <!-- Precio -->
+                    <p id="detallePrecio" style="font-size: 2rem; font-weight: 700; color: var(--primary); margin: 0 0 1.5rem 0;"></p>
+
+                    <!-- Descripción -->
+                    <h3 style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--gray-700);">Descripción</h3>
+                    <p id="detalleDescripcion" style="white-space: pre-wrap; color: var(--gray-600); line-height: 1.6; margin-bottom: 1.5rem;"></p>
+
+                    <hr style="border: none; border-top: 1px solid var(--gray-200); margin: 1.5rem 0;">
+
+                    <!-- Vendedor -->
+                    <h4 style="font-size: 0.8rem; color: var(--gray-400); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Vendedor</h4>
+                    <a id="vendedorLink" href="#" class="flex items-center gap-3 mb-4" style="text-decoration: none; padding: 0.75rem; border-radius: var(--radius-md); transition: background 0.2s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                        <img id="vendedorAvatar" src="/imgs/default-avatar.svg" alt="Avatar" 
+                             style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gray-200);" />
+                        <div style="flex: 1;">
+                            <p id="vendedorNombre" style="font-weight: 600; margin: 0; color: var(--gray-800);"></p>
+                            <p id="vendedorCarrera" style="font-size: 0.85rem; color: var(--gray-500); margin: 0;"></p>
+                        </div>
+                        <div id="vendedorRating" style="display: flex; align-items: center; gap: 4px;">
+                        </div>
+                    </a>
+
+                    <!-- Botones -->
+                    <div class="flex gap-3">
+                        <button id="btnContactar" class="btn btn-primary" style="flex: 1;">
+                            Contactar
+                        </button>
+                        <button id="btnComprar" class="btn btn-success" style="flex: 1;">
+                            Comprar
+                        </button>
+                    </div>
+
+                    <!-- Fecha -->
+                    <p id="detalleFecha" class="text-center mt-4" style="font-size: 0.8rem; color: var(--gray-400);"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" class="empty-state hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3>Publicación no encontrada</h3>
+            <p>La publicación que buscas no existe o ha sido eliminada.</p>
+            <a href="#/publicaciones" class="btn btn-primary">Volver a publicaciones</a>
+        </div>
+    </div>
+</div>

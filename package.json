@@ -1,4 +1,8 @@
 {
+  "name": "itsonmarket",
+  "version": "1.0.0",
+  "description": "Plataforma de compra y venta entre estudiantes del ITSON",
+  "main": "server.js",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
@@ -16,6 +20,8 @@
     "supertest": "^7.1.4"
   },
   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
     "test": "jest --runInBand"
   }
 }

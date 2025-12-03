@@ -68,7 +68,7 @@ class PublicacionService {
   }
 
   async list(params = {}) {
-    if (params.vendedor_id) this._ensureObjectId(params.vendedor_id, 'vendedor_id');
+    // vendedor_id puede ser ObjectId o string, no validar como ObjectId
     if (params.tipo_publicacion && !this.VALID_TYPES.includes(params.tipo_publicacion)) {
       throw new Error('tipo_publicacion inválido');
     }

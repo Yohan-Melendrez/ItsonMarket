@@ -1,29 +1,58 @@
-<section class="flex justify-center items-center h-screen bg-gradient-to-br from-blue-300 to-blue-600">
-  <div class="bg-white shadow-xl p-10 rounded-2xl w-full max-w-md fade-target">
+<section class="auth-page-itson">
+    <div class="auth-card-itson">
+        <!-- Logo ITSON Market -->
+        <img src="/imgs/ItsonMarket.png" alt="ITSON Market" class="auth-logo-itson" />
+        
+        <!-- Subtítulo -->
+        <h2 class="auth-subtitle-itson">PLATAFORMA DE COMPRA Y VENTA</h2>
 
-    <img src="/imgs/logo-itson.jpg" class="h-14 mx-auto mb-4">
+        <div id="login-error" class="alert alert-error hidden mb-4"></div>
 
-    <h1 class="text-center text-2xl font-semibold">ITSONMarket</h1>
-    <p class="text-center text-gray-600 mb-6 text-sm">
-      Plataforma universitaria de compra y venta
-    </p>
+        <form id="loginForm" novalidate>
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    id="itson_id" 
+                    class="form-input-itson" 
+                    placeholder="Ingresar ID ITSON de 11 dígitos"
+                    maxlength="11"
+                    inputmode="numeric"
+                    autocomplete="username"
+                />
+                <p id="err-id" class="form-error hidden"></p>
+            </div>
 
-    <label class="block text-sm font-medium mb-1">ITSON ID*</label>
-    <input id="itson_id" class="w-full border rounded-lg px-3 py-2 mb-1" placeholder="00000247037" maxlength="11">
-    <p id="err-id" class="text-red-600 text-xs mb-3 hidden"></p>
+            <div class="form-group">
+                <div style="position: relative;">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input-itson" 
+                        placeholder="Contraseña"
+                        autocomplete="current-password"
+                    />
+                    <button type="button" id="togglePassword" class="password-toggle-itson" onclick="togglePasswordVisibility('password', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="eyeIcon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </div>
+                <p id="err-pass" class="form-error hidden"></p>
+            </div>
 
-    <label class="block text-sm font-medium mb-1">Contraseña*</label>
-    <input id="password" type="password" class="w-full border rounded-lg px-3 py-2 mb-1">
-    <p id="err-pass" class="text-red-600 text-xs mb-3 hidden"></p>
+            <button type="submit" id="btn-login" class="btn-itson-primary" disabled>
+                <span id="btnLoginText">CONTINUAR</span>
+                <span id="btnLoginLoader" class="loader hidden"></span>
+            </button>
+        </form>
 
-    <button id="btn-login" class="bg-blue-700 hover:bg-blue-800 text-white w-full py-2 rounded-lg mt-2">
-      Iniciar Sesión
-    </button>
+        <a href="#/register" class="link-itson">
+            ¿No tienes cuenta? Regístrate
+        </a>
 
-    <p class="text-center mt-4 text-sm">
-      ¿No tienes cuenta?
-      <a href="#/register" class="text-blue-600 hover:underline">Regístrate</a>
-    </p>
-
-  </div>
+        <a href="#/publicaciones" class="link-itson-secondary">
+            Explorar sin cuenta →
+        </a>
+    </div>
 </section>

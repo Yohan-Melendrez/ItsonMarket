@@ -2,50 +2,49 @@
 const { body, param, query } = require('express-validator');
 
 const TIPOS = ['producto', 'servicio'];
-const DIGITS = /^\d{5,20}$/; // ajusta longitud si tu padrón lo requiere
 
 // El _id de la publicación SÍ es ObjectId:
 const idParam = [ param('id').isMongoId().withMessage('id inválido') ];
 
-// El vendedorId NO es ObjectId: es una cadena numérica
+// El vendedorId puede ser ObjectId o ITSON ID numérico
 const vendedorParam = [
   param('vendedorId')
-    .isString().withMessage('vendedorId requerido')
-    .matches(DIGITS).withMessage('vendedorId inválido (solo dígitos)'),
+    .isString().withMessage('vendedorId requerido'),
 ];
 
 exports.create = [
   body('tipo_publicacion').isIn(TIPOS).withMessage('tipo_publicacion inválido'),
   body('vendedor_id')
-    .isString().withMessage('vendedor_id requerido')
-    .matches(DIGITS).withMessage('vendedor_id inválido (solo dígitos)'),
-  body('titulo').isString().notEmpty(),
-  body('descripcion').isString().notEmpty(),
-  body('categoria').isString().notEmpty(),
+    .isString().withMessage('vendedor_id requerido'),
+  body('titulo').isString().notEmpty().withMessage('titulo requerido'),
+  body('descripcion').isString().notEmpty().withMessage('descripcion requerida'),
+  body('categoria').isString().notEmpty().withMessage('categoria requerida'),
   body('precio').isFloat({ min: 0 }).withMessage('precio inválido'),
   body('visible').optional().isBoolean(),
   body('estado').optional().isString(),
+  body('detalles').optional().isObject(),
+  body('detalles.imagenes').optional().isArray(),
 ];
 
 exports.update = [
   ...idParam,
   body('tipo_publicacion').optional().isIn(TIPOS),
-  body('vendedor_id').optional()
-    .isString().matches(DIGITS).withMessage('vendedor_id inválido (solo dígitos)'),
+  body('vendedor_id').optional().isString(),
   body('titulo').optional().isString().notEmpty(),
   body('descripcion').optional().isString().notEmpty(),
   body('categoria').optional().isString().notEmpty(),
   body('precio').optional().isFloat({ min: 0 }),
   body('visible').optional().isBoolean(),
   body('estado').optional().isString(),
+  body('detalles').optional().isObject(),
+  body('detalles.imagenes').optional().isArray(),
 ];
 
 exports.getById = [ ...idParam ];
 
 exports.list = [
   query('categoria').optional().isString(),
-  query('vendedor_id').optional()
-    .isString().matches(DIGITS).withMessage('vendedor_id inválido (solo dígitos)'),
+  query('vendedor_id').optional().isString(),
   query('titulo').optional().isString(),
   query('tipo_publicacion').optional().isIn(TIPOS),
   query('precioMin').optional().isFloat({ min: 0 }),

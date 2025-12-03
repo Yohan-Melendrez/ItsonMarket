@@ -3,25 +3,21 @@ const repo = new ChatRepository();
 
 /**
  * @route GET /api/chats
- * @desc Obtener todos los chats (protegido)
+ * @desc Obtener todos los chats del usuario actual (protegido)
  * @access Private
  */
 exports.obtenerChats = async (req, res, next) => {
   try {
-    const chats = await repo.findAll();
+    const usuarioId = req.user?.id || req.user?._id;
+    
+    // Obtener solo los chats donde el usuario es participante
+    const chats = await repo.findByParticipante(usuarioId);
 
     if (!chats || chats.length === 0) {
-      return res.status(404).json({
-        mensaje: 'No hay chats registrados en el sistema',
-        data: [],
-      });
+      return res.status(200).json([]);
     }
 
-    res.status(200).json({
-      mensaje: 'Chats obtenidos correctamente',
-      cantidad: chats.length,
-      data: chats,
-    });
+    res.status(200).json(chats);
   } catch (err) {
     next(err);
   }
@@ -59,7 +55,32 @@ exports.obtenerChatPorId = async (req, res, next) => {
  */
 exports.crearChat = async (req, res, next) => {
   try {
-    const { participantes, publicacion_id, mensajes } = req.body;
+    let { participantes, participante_id, publicacion_id, mensajes } = req.body;
+    
+    // El usuario actual viene del token
+    const usuarioActualId = req.user?.id || req.user?._id;
+    
+    // Si se envía participante_id (singular), construir el array de participantes
+    if (participante_id && !participantes) {
+      participantes = [usuarioActualId, participante_id];
+    }
+    
+    // Validar que hay participantes
+    if (!participantes || participantes.length < 2) {
+      return res.status(400).json({
+        error: 'Se requieren al menos 2 participantes para crear un chat'
+      });
+    }
+
+    // Verificar si ya existe un chat entre estos participantes
+    const chatExistente = await repo.findByParticipants(participantes);
+    if (chatExistente) {
+      return res.status(200).json({
+        mensaje: 'Chat ya existente',
+        _id: chatExistente._id,
+        data: chatExistente,
+      });
+    }
 
     const nuevoChat = await repo.insert({
       participantes,
@@ -69,6 +90,7 @@ exports.crearChat = async (req, res, next) => {
 
     res.status(201).json({
       mensaje: 'Chat creado correctamente',
+      _id: nuevoChat._id,
       data: nuevoChat,
     });
   } catch (err) {
@@ -136,7 +158,10 @@ exports.eliminarChat = async (req, res, next) => {
 exports.enviarMensaje = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { contenido, tipo, remitente_id } = req.body;
+    const { contenido, tipo, remitente_id, emisor_id } = req.body;
+    
+    // El emisor viene del token o del body
+    const emisorIdFinal = req.user?.id || req.user?._id || emisor_id || remitente_id;
 
     if (!contenido) {
       return res.status(400).json({
@@ -145,9 +170,11 @@ exports.enviarMensaje = async (req, res, next) => {
     }
 
     const mensaje = {
-      remitente_id,
+      emisor_id: emisorIdFinal,
+      remitente_id: emisorIdFinal, // mantener compatibilidad
       contenido,
       tipo: tipo || 'texto',
+      fecha: new Date(),
       fecha_envio: new Date(),
       leido: false,
     };

@@ -1,0 +1,196 @@
+<div class="main-content">
+    <div class="container container-lg">
+        <!-- Header -->
+        <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+            <div>
+                <h1 class="page-title">Mis Transacciones</h1>
+                <p class="page-subtitle">Historial de compras y ventas</p>
+            </div>
+        </div>
+
+        <!-- Tabs de tipo -->
+        <div class="tabs mb-6">
+            <button class="tab active" data-filter="todas">
+                Todas
+                <span class="badge badge-primary" id="countTodas" style="margin-left: 0.5rem;">0</span>
+            </button>
+            <button class="tab" data-filter="compras">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin-right: 0.5rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Compras
+            </button>
+            <button class="tab" data-filter="ventas">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin-right: 0.5rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Ventas
+            </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card mb-6" style="padding: 1rem;">
+            <div class="flex items-center gap-4 flex-wrap">
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                    <select id="filtroEstado" class="form-input" style="padding: 0.625rem 1rem;">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="aceptada">Aceptada</option>
+                        <option value="en_proceso">En proceso</option>
+                        <option value="completada">Completada</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                    <input type="month" id="filtroMes" class="form-input" style="padding: 0.625rem 1rem;">
+                </div>
+                <button type="button" id="btnLimpiarFiltros" class="btn btn-outline">
+                    Limpiar filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de transacciones -->
+        <div id="transaccionesLista">
+            <!-- Loading -->
+            <div id="loadingTransacciones" class="text-center" style="padding: 3rem;">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem; color: var(--gray-500);">Cargando transacciones...</p>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="sinTransacciones" class="empty-state hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+            <h3>No tienes transacciones</h3>
+            <p>Cuando compres o vendas algo, aparecerá aquí.</p>
+            <a href="#/publicaciones" class="btn btn-primary">
+                Explorar publicaciones
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Template de transacción (para clonar con JS) -->
+<template id="transaccionTemplate">
+    <div class="card transaccion-item" style="padding: 0; margin-bottom: 1rem; overflow: hidden;">
+        <div class="flex">
+            <!-- Imagen -->
+            <div class="transaccion-imagen" style="width: 140px; min-height: 140px; background: var(--gray-100);">
+                <img src="" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            
+            <!-- Contenido -->
+            <div style="flex: 1; padding: 1.25rem;">
+                <div class="flex items-start justify-between gap-4">
+                    <div style="flex: 1;">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="badge transaccion-tipo"></span>
+                            <span class="badge transaccion-estado"></span>
+                        </div>
+                        <h3 class="transaccion-titulo" style="margin: 0 0 0.5rem; font-size: 1.1rem;"></h3>
+                        <p class="transaccion-fecha" style="font-size: 0.85rem; color: var(--gray-500); margin: 0;"></p>
+                    </div>
+                    <div class="text-right">
+                        <p class="transaccion-precio" style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin: 0;"></p>
+                    </div>
+                </div>
+                
+                <!-- Usuario contraparte -->
+                <div class="flex items-center gap-3 mt-4 pt-4" style="border-top: 1px solid var(--gray-200);">
+                    <img class="transaccion-usuario-avatar" src="/imgs/default-avatar.svg" alt="" 
+                         style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                    <div style="flex: 1;">
+                        <p class="transaccion-usuario-rol" style="font-size: 0.75rem; color: var(--gray-500); margin: 0;"></p>
+                        <p class="transaccion-usuario-nombre" style="font-weight: 500; margin: 0;"></p>
+                    </div>
+                    <div class="transaccion-acciones flex gap-2">
+                        <!-- Se agregan dinámicamente según estado -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Modal calificar -->
+<div id="modalCalificar" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Calificar transacción</h3>
+            <button type="button" class="btn btn-icon" onclick="cerrarModalCalificar()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="calificarTransaccionId">
+            
+            <div class="text-center mb-6">
+                <p style="color: var(--gray-600); margin-bottom: 1rem;">¿Cómo fue tu experiencia?</p>
+                <div id="estrellas" class="flex justify-center gap-2">
+                    <button type="button" class="btn-estrella" data-rating="1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-estrella" data-rating="2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-estrella" data-rating="3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-estrella" data-rating="4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-estrella" data-rating="5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </button>
+                </div>
+                <p id="textoCalificacion" style="margin-top: 0.5rem; color: var(--gray-500);"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="comentarioCalificacion" class="form-label">Comentario (opcional)</label>
+                <textarea id="comentarioCalificacion" class="form-input" rows="3" 
+                          placeholder="Comparte tu experiencia con otros usuarios..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="cerrarModalCalificar()">Cancelar</button>
+            <button type="button" id="btnEnviarCalificacion" class="btn btn-primary" disabled>
+                Enviar calificación
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal detalles transacción -->
+<div id="modalDetalles" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Detalles de la transacción</h3>
+            <button type="button" class="btn btn-icon" onclick="cerrarModalDetalles()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" id="detallesContenido">
+            <!-- Se carga dinámicamente -->
+        </div>
+    </div>
+</div>

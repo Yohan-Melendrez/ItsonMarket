@@ -51,10 +51,16 @@ router.post('/login', [
       mensaje: 'Autenticación exitosa',
       token,
       usuario: {
+        _id: usuario._id,
+        id: usuario._id,
         itson_id: usuario.itson_id,
         nombre: usuario.nombre,
         correo: usuario.correo_institucional,
+        correo_institucional: usuario.correo_institucional,
         carrera: usuario.carrera,
+        telefono: usuario.telefono,
+        foto: usuario.foto,
+        reputacion: usuario.reputacion
       }
     });
   } catch (error) {
@@ -106,11 +112,16 @@ router.post('/register', [
       mensaje: 'Registro OK',
       token,
       usuario: {
+        _id: creado._id,
         id: creado._id,
         itson_id: creado.itson_id,
         nombre: creado.nombre,
+        correo: creado.correo_institucional,
         correo_institucional: creado.correo_institucional,
-        carrera: creado.carrera
+        carrera: creado.carrera,
+        telefono: creado.telefono,
+        foto: creado.foto,
+        reputacion: creado.reputacion
       }
     });
 

@@ -49,8 +49,13 @@ const crearUsuarioValidator = [
 
   body('foto')
     .optional()
-    .isURL()
-    .withMessage('La foto debe ser una URL valida')
+    .custom(value => {
+      // Aceptar URL o Base64
+      if (value && !value.startsWith('http') && !value.startsWith('data:image')) {
+        throw new Error('La foto debe ser una URL válida o imagen en Base64');
+      }
+      return true;
+    })
 ];
 
 const actualizarUsuarioValidator = [
@@ -84,8 +89,13 @@ const actualizarUsuarioValidator = [
 
   body('foto')
     .optional()
-    .isURL()
-    .withMessage('La foto debe ser una URL válida')
+    .custom(value => {
+      // Aceptar URL o Base64
+      if (value && !value.startsWith('http') && !value.startsWith('data:image')) {
+        throw new Error('La foto debe ser una URL válida o imagen en Base64');
+      }
+      return true;
+    })
 ];
 
 module.exports = {

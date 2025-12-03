@@ -4,13 +4,22 @@ const controller = require('../controllers/usuariosController');
 const authMiddleware = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
 const { crearUsuarioValidator, actualizarUsuarioValidator } = require('../validators/usuarioValidator');
+
 /**
  * @route POST /api/usuarios
  * @desc Crear un nuevo usuario
- * @access Private
+ * @access Public (para registro)
  */
 router.post('/', crearUsuarioValidator, handleValidationErrors, controller.crearUsuario);
 
+/**
+ * @route GET /api/usuarios/:id
+ * @desc Obtener un usuario por ID o ITSON ID (perfil público)
+ * @access Public
+ */
+router.get('/:id', controller.obtenerUsuarioPorId);
+
+// A partir de aquí requieren autenticación
 router.use(authMiddleware);
 
 /**
@@ -20,14 +29,12 @@ router.use(authMiddleware);
  */
 router.get('/', controller.obtenerUsuarios);
 
-
-
 /**
- * @route GET /api/usuarios/:id
- * @desc Obtener un usuario por ITSON ID
+ * @route GET /api/usuarios/buscar
+ * @desc Buscar usuarios por nombre
  * @access Private
  */
-router.get('/:id', controller.obtenerUsuarioPorId);
+router.get('/buscar', controller.buscarUsuarios);
 
 /**
  * @route PUT /api/usuarios/:id
