@@ -1,10 +1,4 @@
-/**
- * Login Module - ItsonMarket
- */
-
 function initLogin() {
-    console.log("initLogin() inicializado");
-
     const form = document.getElementById("loginForm");
     const id = document.getElementById("itson_id");
     const pass = document.getElementById("password");
@@ -16,7 +10,6 @@ function initLogin() {
     const btnLoading = document.getElementById("btnLoginLoader");
 
     if (!form || !id || !pass || !btn) {
-        console.error("Elementos del formulario no encontrados");
         return;
     }
 
@@ -120,7 +113,6 @@ function initLogin() {
             }, 300);
 
         } catch (err) {
-            console.error("Error de login:", err);
             showError(errGeneral, "Error de conexión. Intenta de nuevo.");
             setLoading(false);
         }

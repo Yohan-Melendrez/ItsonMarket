@@ -1,14 +1,3 @@
-/**
- * ItsonMarket Web Components
- * Implementación de Micro-Frontends usando Custom Elements
- * Estos componentes encapsulan funcionalidad reutilizable de la UI
- */
-
-// ============= NAVBAR COMPONENT =============
-/**
- * <navbar-component> - Barra de navegación reutilizable
- * Maneja autenticación, menú de usuario y navegación móvil
- */
 class NavbarComponent extends HTMLElement {
     constructor() {
         super();
@@ -421,11 +410,6 @@ class NavbarComponent extends HTMLElement {
     }
 }
 
-// ============= PUBLICACION CARD COMPONENT =============
-/**
- * <publicacion-card> - Tarjeta de publicación reutilizable
- * Atributos: pub-id, titulo, descripcion, precio, imagen, categoria, tipo, fecha, estado
- */
 class PublicacionCard extends HTMLElement {
     constructor() {
         super();
@@ -641,10 +625,6 @@ class PublicacionCard extends HTMLElement {
     }
 }
 
-// ============= TRANSACCION CARD COMPONENT =============
-/**
- * <transaccion-card> - Tarjeta de transacción reutilizable
- */
 class TransaccionCard extends HTMLElement {
     constructor() {
         super();
@@ -912,11 +892,6 @@ class TransaccionCard extends HTMLElement {
     }
 }
 
-// ============= RATING STARS COMPONENT =============
-/**
- * <rating-stars> - Componente de estrellas para calificación
- * Atributos: rating (1-5), readonly (true/false), size (sm/md/lg)
- */
 class RatingStars extends HTMLElement {
     constructor() {
         super();
@@ -1060,11 +1035,6 @@ class RatingStars extends HTMLElement {
     }
 }
 
-// ============= LOADING SPINNER COMPONENT =============
-/**
- * <loading-spinner> - Spinner de carga reutilizable
- * Atributos: size (sm/md/lg), text (texto opcional)
- */
 class LoadingSpinner extends HTMLElement {
     constructor() {
         super();
@@ -1132,11 +1102,6 @@ class LoadingSpinner extends HTMLElement {
     }
 }
 
-// ============= TOAST NOTIFICATION COMPONENT =============
-/**
- * <toast-notification> - Notificación toast
- * Atributos: type (success/error/warning/info), message, duration
- */
 class ToastNotification extends HTMLElement {
     constructor() {
         super();
@@ -1273,11 +1238,6 @@ class ToastNotification extends HTMLElement {
     }
 }
 
-// ============= EMPTY STATE COMPONENT =============
-/**
- * <empty-state> - Estado vacío reutilizable
- * Atributos: icon (svg path), title, description, action-text, action-href
- */
 class EmptyState extends HTMLElement {
     constructor() {
         super();
@@ -1374,7 +1334,6 @@ class EmptyState extends HTMLElement {
     }
 }
 
-// ============= REGISTRAR TODOS LOS COMPONENTES =============
 customElements.define('navbar-component', NavbarComponent);
 customElements.define('publicacion-card', PublicacionCard);
 customElements.define('transaccion-card', TransaccionCard);
@@ -1394,5 +1353,3 @@ window.showComponentToast = function(message, type = 'info', duration = 4000) {
     toast.setAttribute('duration', duration);
     container.appendChild(toast);
 };
-
-console.log('✅ Web Components cargados: navbar-component, publicacion-card, transaccion-card, rating-stars, loading-spinner, toast-notification, empty-state');

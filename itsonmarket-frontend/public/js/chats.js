@@ -1,19 +1,13 @@
-/**
- * Chats Module - ItsonMarket
- */
-
 var chatsData = window.chatsData || [];
 var chatActualId = chatActualId || null;
 
 if (window.mensajesPollingInterval) clearInterval(window.mensajesPollingInterval);
 var mensajesPollingInterval = null;
 
-//Se usa el window para evitar redeclaraciones
 window.chatsData = chatsData;
 window.chatActualId = chatActualId;
 
 function initChats() {
-    console.log("initChats() inicializado");
 
     if (!window.AuthState?.isLoggedIn()) {
         navigateTo('/login');
@@ -50,7 +44,6 @@ function initChats() {
             clearInterval(vigilarDOM);
             initEventListeners();
             if (window.chatsData && window.chatsData.length > 0) {
-                console.log("Pintando desde memoria caché...");
                 const loading = document.getElementById('loadingChats');
                 if (loading) loading.classList.add('hidden');
                 renderChatList(window.chatsData);
@@ -103,12 +96,11 @@ async function cargarChats() {
 
     // Verificar que hay token antes de hacer la petición
     if (!window.AuthState?.token) {
-        console.log("No hay token de autenticación");
         if (loading) loading.classList.add('hidden');
         if (chatList) {
             chatList.innerHTML = `
-                <div class="text-center" style="padding: 2rem; color: var(--gray-500);">
-                    <p>Inicia sesión para ver tus mensajes</p>
+                <div class="empty-state-message">
+                    <p>Inicia sesion para ver tus mensajes</p>
                 </div>
             `;
         }
@@ -143,18 +135,17 @@ async function cargarChats() {
         }
 
     } catch (err) {
-        console.error("Error cargando chats:", err);
         if (loading) loading.classList.add('hidden');
         
         // Si no hay chats, mostrar mensaje amigable en lugar de error
         if (chatList) {
             chatList.innerHTML = `
-                <div class="text-center" style="padding: 2rem; color: var(--gray-500);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin: 0 auto 1rem; opacity: 0.5;">
+                <div class="empty-state-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="empty-state-icon">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <p style="font-weight: 500;">No tienes conversaciones aún</p>
-                    <p style="font-size: 0.85rem; margin-top: 0.5rem;">Inicia un chat desde una publicación</p>
+                    <p class="empty-state-title">No tienes conversaciones aun</p>
+                    <p class="empty-state-subtitle">Inicia un chat desde una publicacion</p>
                 </div>
             `;
         }
@@ -170,7 +161,7 @@ function renderChatList(filteredChats = null) {
 
     if (chats.length === 0) {
         chatList.innerHTML = `
-            <div class="text-center" style="padding: 2rem; color: var(--gray-500);">
+            <div class="empty-state-message">
                 <p>No tienes conversaciones</p>
             </div>
         `;
@@ -329,9 +320,8 @@ async function cargarMensajes(chatId) {
         marcarComoLeido(chatId);
 
     } catch (err) {
-        console.error("Error cargando mensajes:", err);
         chatMessages.innerHTML = `
-            <div class="text-center" style="padding: 2rem; color: var(--gray-500);">
+            <div class="empty-state-message">
                 Error al cargar mensajes
             </div>
         `;
@@ -346,9 +336,9 @@ function renderMensajes(mensajes) {
 
     if (mensajes.length === 0) {
         chatMessages.innerHTML = `
-            <div class="text-center" style="padding: 2rem; color: var(--gray-500);">
-                <p>No hay mensajes aún</p>
-                <p style="font-size: 0.85rem;">¡Envía el primer mensaje!</p>
+            <div class="empty-state-message">
+                <p>No hay mensajes aun</p>
+                <p class="empty-state-subtitle">Envia el primer mensaje!</p>
             </div>
         `;
         return;
@@ -408,9 +398,8 @@ async function enviarMensaje() {
         cargarChats();
 
     } catch (err) {
-        console.error("Error enviando mensaje:", err);
         showToast('Error al enviar el mensaje', 'error');
-        input.value = contenido; // Restaurar mensaje si falla
+        input.value = contenido;
     }
 }
 
@@ -427,7 +416,6 @@ async function marcarComoLeido(chatId) {
             })
         });
     } catch (err) {
-        console.warn("No se pudo marcar como leído:", err);
     }
 }
 
@@ -493,6 +481,5 @@ async function cargarChatIndividual(id) {
             abrirChat(chat);
         }
     } catch (err) {
-        console.error("Error cargando chat individual:", err);
     }
 }

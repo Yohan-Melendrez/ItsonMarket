@@ -1,24 +1,13 @@
-/**
- * Usuarios Module - ItsonMarket
- */
-
 function initUsuarios() {
-    console.log("initUsuarios() inicializado");
-    
     const path = location.hash.replace("#", "");
-    console.log("Path actual:", path);
-    console.log("routeParams:", window.routeParams);
     
     if (path === '/perfil') {
         initPerfil();
     } else if (path === '/perfil/editar') {
         initEditarPerfil();
     } else if (path.startsWith('/usuario/')) {
-        // Ver perfil de otro usuario
-        // Extraer el ID del path: /usuario/abc123 -> abc123
         const pathParts = path.split('/');
         const userId = window.routeParams?.id || pathParts[2];
-        console.log("userId extraído:", userId);
         if (userId) {
             initPerfilUsuario(userId);
         } else {
@@ -28,18 +17,13 @@ function initUsuarios() {
     }
 }
 
-// ============= PERFIL DE OTRO USUARIO =============
 async function initPerfilUsuario(userId) {
-    console.log("initPerfilUsuario llamado con userId:", userId);
-    
     if (!userId) {
-        console.error("userId está vacío");
         showToast('Usuario no encontrado', 'error');
         navigateTo('/publicaciones');
         return;
     }
 
-    // Elementos del DOM
     const perfilAvatar = document.getElementById("perfilAvatar");
     const perfilNombre = document.getElementById("perfilNombre");
     const perfilCorreo = document.getElementById("perfilCorreo");
@@ -53,10 +37,8 @@ async function initPerfilUsuario(userId) {
     const infoCorreo = document.getElementById("infoCorreo");
     const btnEditar = document.getElementById("btnEditarPerfil");
 
-    // Ocultar botón de editar si es perfil de otro usuario
     if (btnEditar) btnEditar.style.display = 'none';
 
-    // Cargar datos del usuario
     try {
         const headers = {};
         if (window.AuthState?.token) {
@@ -112,7 +94,6 @@ async function initPerfilUsuario(userId) {
         });
 
     } catch (err) {
-        console.error("Error cargando perfil:", err);
         showToast('Usuario no encontrado', 'error');
         navigateTo('/publicaciones');
     }
@@ -140,26 +121,24 @@ async function cargarPublicacionesUsuario(userId) {
         }
 
         container.innerHTML = publicaciones.map(pub => `
-            <a href="#/publicaciones/${pub._id}" class="card" style="display: block; text-decoration: none; margin-bottom: 1rem;">
-                <div style="display: flex; gap: 1rem; padding: 1rem;">
+            <a href="#/publicaciones/${pub._id}" class="card publicacion-mini-card">
+                <div class="publicacion-mini-content">
                     <img src="${pub.detalles?.imagenes?.[0] || '/imgs/default-product.svg'}" 
                          alt="${pub.titulo}" 
-                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" />
-                    <div style="flex: 1;">
-                        <h4 style="margin: 0 0 0.5rem 0; color: var(--gray-800);">${pub.titulo}</h4>
-                        <p style="margin: 0; color: var(--primary); font-weight: 600;">${formatCurrency(pub.precio)}</p>
+                         class="publicacion-mini-imagen" />
+                    <div class="publicacion-mini-info">
+                        <h4>${pub.titulo}</h4>
+                        <p class="publicacion-mini-precio">${formatCurrency(pub.precio)}</p>
                     </div>
                 </div>
             </a>
         `).join('');
 
     } catch (err) {
-        console.error("Error cargando publicaciones:", err);
         container.innerHTML = '<p class="text-center text-muted">Error al cargar publicaciones</p>';
     }
 }
 
-// ============= PERFIL DE USUARIO =============
 async function initPerfil() {
     if (!window.AuthState?.isLoggedIn()) {
         navigateTo('/login');
@@ -169,7 +148,6 @@ async function initPerfil() {
     const userId = window.AuthState.user?._id;
     if (!userId) return;
 
-    // Elementos del DOM
     const perfilAvatar = document.getElementById("perfilAvatar");
     const perfilNombre = document.getElementById("perfilNombre");
     const perfilCorreo = document.getElementById("perfilCorreo");
@@ -243,7 +221,6 @@ async function initPerfil() {
         await cargarEstadisticas(userId);
 
     } catch (err) {
-        console.error("Error cargando perfil:", err);
         showToast('Error al cargar el perfil', 'error');
     }
 }
@@ -274,7 +251,6 @@ async function cargarEstadisticas(userId) {
             statTransacciones.textContent = transacciones.length;
         }
     } catch (err) {
-        console.error("Error cargando estadísticas:", err);
     }
 }
 
@@ -285,7 +261,7 @@ async function cargarMisPublicaciones() {
 
     if (!container) return;
 
-    container.innerHTML = '<div class="spinner" style="grid-column: 1/-1; margin: 2rem auto;"></div>';
+    container.innerHTML = '<div class="spinner spinner-grid"></div>';
 
     try {
         // Usar endpoint específico para vendedor que incluye todas las publicaciones (visibles o no)
@@ -308,27 +284,26 @@ async function cargarMisPublicaciones() {
         if (sinPublicaciones) sinPublicaciones.classList.add('hidden');
 
         container.innerHTML = publicaciones.map(pub => `
-            <div class="card" style="padding: 0; overflow: hidden;">
-                <div style="position: relative;">
+            <div class="card user-pub-card">
+                <div class="user-pub-image-wrapper">
                     <img src="${pub.detalles?.imagenes?.[0] || '/imgs/default-product.svg'}" alt="${pub.titulo}"
-                         style="width: 100%; height: 150px; object-fit: cover;"
+                         class="user-pub-image"
                          onerror="this.src='/imgs/default-product.svg'">
-                    <span class="badge ${pub.estado === 'disponible' ? 'badge-success' : 'badge-error'}"
-                          style="position: absolute; top: 0.5rem; right: 0.5rem;">
+                    <span class="badge ${pub.estado === 'disponible' ? 'badge-success' : 'badge-error'} user-pub-badge">
                         ${pub.estado === 'disponible' ? 'Activo' : 'Vendido'}
                     </span>
                 </div>
-                <div style="padding: 1rem;">
-                    <h4 style="margin: 0 0 0.5rem; font-size: 0.95rem;">${pub.titulo}</h4>
-                    <p style="color: var(--primary); font-weight: 600; margin: 0;">
+                <div class="user-pub-body">
+                    <h4 class="user-pub-title">${pub.titulo}</h4>
+                    <p class="user-pub-price">
                         ${formatCurrency(pub.precio || 0)}
                     </p>
                     <div class="flex gap-2 mt-3">
-                        <a href="#/publicaciones/${pub._id}" class="btn btn-sm btn-outline" style="flex: 1; font-size: 0.8rem;">
+                        <a href="#/publicaciones/${pub._id}" class="btn btn-sm btn-outline flex-1">
                             Ver
                         </a>
                         <button onclick="eliminarPublicacion('${pub._id}')" 
-                                class="btn btn-sm" style="background: var(--error); color: white; font-size: 0.8rem;">
+                                class="btn btn-sm btn-delete">
                             Eliminar
                         </button>
                     </div>
@@ -337,8 +312,7 @@ async function cargarMisPublicaciones() {
         `).join('');
 
     } catch (err) {
-        console.error("Error cargando publicaciones:", err);
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Error al cargar publicaciones</p>';
+        container.innerHTML = '<p class="empty-state-message">Error al cargar publicaciones</p>';
     }
 }
 
@@ -349,7 +323,7 @@ async function cargarMisResenas() {
 
     if (!container) return;
 
-    container.innerHTML = '<div class="spinner" style="margin: 2rem auto;"></div>';
+    container.innerHTML = '<div class="spinner spinner-centered"></div>';
 
     try {
         // Obtener transacciones donde este usuario fue vendedor y extraer calificaciones
@@ -377,14 +351,14 @@ async function cargarMisResenas() {
         if (sinResenas) sinResenas.classList.add('hidden');
 
         container.innerHTML = resenas.map(r => `
-            <div class="card" style="margin-bottom: 1rem; padding: 1.25rem;">
+            <div class="card review-card">
                 <div class="flex items-start gap-4">
                     <img src="${r.autor?.foto || '/imgs/default-avatar.svg'}" alt=""
-                         style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
-                    <div style="flex: 1;">
+                         class="review-avatar">
+                    <div class="review-content">
                         <div class="flex items-center justify-between">
-                            <h4 style="margin: 0;">${r.autor?.nombre || r.autor?.itson_id || 'Usuario'}</h4>
-                            <div class="flex items-center gap-1" style="color: var(--warning);">
+                            <h4 class="review-author">${r.autor?.nombre || r.autor?.itson_id || 'Usuario'}</h4>
+                            <div class="flex items-center gap-1 review-stars">
                                 ${Array(5).fill(0).map((_, i) => `
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
                                          fill="${i < r.calificacion ? 'currentColor' : 'none'}" 
@@ -395,8 +369,8 @@ async function cargarMisResenas() {
                                 `).join('')}
                             </div>
                         </div>
-                        <p style="color: var(--gray-600); margin: 0.5rem 0;">${r.comentario || ''}</p>
-                        <span style="font-size: 0.75rem; color: var(--gray-400);">
+                        <p class="review-comment">${r.comentario || ''}</p>
+                        <span class="review-date">
                             ${formatRelativeTime(r.fecha)}
                         </span>
                     </div>
@@ -405,12 +379,10 @@ async function cargarMisResenas() {
         `).join('');
 
     } catch (err) {
-        console.error("Error cargando reseñas:", err);
-        container.innerHTML = '<p style="text-align: center; color: var(--gray-500);">Error al cargar reseñas</p>';
+        container.innerHTML = '<p class="empty-state-message">Error al cargar reseñas</p>';
     }
 }
 
-// ============= EDITAR PERFIL =============
 function initEditarPerfil() {
     if (!window.AuthState?.isLoggedIn()) {
         navigateTo('/login');
@@ -550,7 +522,6 @@ function initEditarPerfil() {
                 showToast('Perfil actualizado', 'success');
 
             } catch (err) {
-                console.error("Error actualizando perfil:", err);
                 if (editarError) {
                     editarError.textContent = err.message || 'Error al actualizar';
                     editarError.classList.remove('hidden');
@@ -594,7 +565,6 @@ function initEditarPerfil() {
                 showToast('Cuenta eliminada', 'info');
                 window.AuthState.logout();
             } catch (err) {
-                console.error("Error eliminando cuenta:", err);
                 showToast('Error al eliminar la cuenta', 'error');
             }
         });
@@ -624,7 +594,6 @@ window.eliminarPublicacion = async function(id) {
         showToast('Publicación eliminada', 'success');
         cargarMisPublicaciones();
     } catch (err) {
-        console.error("Error eliminando publicación:", err);
         showToast('Error al eliminar la publicación', 'error');
     }
 };

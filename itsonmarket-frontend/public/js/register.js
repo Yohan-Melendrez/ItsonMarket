@@ -1,13 +1,6 @@
-/**
- * Register Module - ItsonMarket
- */
-
 function initRegister() {
-    console.log("initRegister() inicializado");
-
     const form = document.getElementById("registerForm");
     if (!form) {
-        console.error("Formulario de registro no encontrado");
         return;
     }
 
@@ -165,14 +158,14 @@ function initRegister() {
         }
         if (valTel === "") ok = false;
 
-        // 8. TÉRMINOS
-        if (!fields.terminos.checked) {
-            ok = false;
-        } else {
-            hideError("terminos");
+        if (fields.terminos) {
+            if (!fields.terminos.checked) {
+                ok = false;
+            } else {
+                hideError("terminos");
+            }
         }
 
-        // HABILITAR/DESHABILITAR BOTÓN
         if (btn) btn.disabled = !ok;
 
         return ok;
@@ -324,7 +317,6 @@ function initRegister() {
             }, 300);
 
         } catch (err) {
-            console.error("Error de registro:", err);
             if (errGeneral) {
                 errGeneral.textContent = "Error de conexión. Intenta de nuevo.";
                 errGeneral.classList.remove("hidden");

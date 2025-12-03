@@ -1,8 +1,3 @@
-/**
- * Publicaciones Module - ItsonMarket
- */
-
-// Variables globales del módulo
 var publicacionesData = window.publicacionesData || [];
 var filtroActual = window.filtroActual || {
     busqueda: '',
@@ -10,13 +5,11 @@ var filtroActual = window.filtroActual || {
     tipo: '',
     orden: 'recientes'
 };
-//Se usa el window para evitar redeclaraciones
+
 window.publicacionesData = publicacionesData;
 window.filtroActual = filtroActual;
 
 function initPublicaciones() {
-    console.log("initPublicaciones() inicializado");
-
     const path = location.hash.replace("#", "");
 
     if (path === '/publicaciones') {
@@ -31,7 +24,6 @@ function initPublicaciones() {
     }
 }
 
-// ============= LISTA DE PUBLICACIONES =============
 async function initListaPublicaciones() {
     const container = document.getElementById("publicaciones-container");
     const loading = document.getElementById("loadingState");
@@ -40,7 +32,6 @@ async function initListaPublicaciones() {
     const filtroTipo = document.getElementById("filterTipo");
     const filtroOrden = document.getElementById("filterOrden");
 
-    // Event listeners para filtros
     if (searchInput) {
         searchInput.addEventListener("input", debounce((e) => {
             filtroActual.busqueda = e.target.value;
@@ -62,7 +53,6 @@ async function initListaPublicaciones() {
         });
     }
 
-    // Cargar publicaciones
     await cargarPublicaciones();
 }
 
@@ -95,11 +85,10 @@ async function cargarPublicaciones() {
         renderPublicaciones();
 
     } catch (err) {
-        console.error("Error cargando publicaciones:", err);
         if (loading) loading.classList.add("hidden");
         if (container) {
             container.innerHTML = `
-                <div class="empty-state" style="grid-column: 1/-1;">
+                <div class="empty-state">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
@@ -132,7 +121,6 @@ function renderPublicaciones() {
         return true;
     });
 
-    // Ordenar según el valor del select
     switch (filtroActual.orden) {
         case 'precio':
             filtered.sort((a, b) => (a.precio || 0) - (b.precio || 0));
@@ -151,7 +139,6 @@ function renderPublicaciones() {
             filtered.sort((a, b) => new Date(b.fecha_publicacion || 0) - new Date(a.fecha_publicacion || 0));
     }
 
-    // Mostrar empty state si no hay resultados
     if (filtered.length === 0) {
         container.innerHTML = "";
         if (emptyState) emptyState.classList.remove("hidden");
@@ -160,12 +147,8 @@ function renderPublicaciones() {
 
     if (emptyState) emptyState.classList.add("hidden");
 
-    // Renderizar cards usando Web Components (Micro-Frontend)
-    // Usamos el componente <publicacion-card> para modularizar
     container.innerHTML = filtered.map(pub => crearCardPublicacion(pub)).join("");
 
-    // Los event listeners ahora están dentro del Web Component
-    // Pero mantenemos compatibilidad con las cards tradicionales
     container.querySelectorAll('.publicacion-card').forEach(card => {
         card.addEventListener('click', () => {
             const id = card.dataset.id;
@@ -175,67 +158,43 @@ function renderPublicaciones() {
 }
 
 function crearCardPublicacion(pub) {
-    // Las imágenes están en detalles.imagenes según el modelo
     const imagen = pub.detalles?.imagenes?.[0] || pub.imagenes?.[0] || '/imgs/default-product.svg';
     const precio = formatCurrency ? formatCurrency(pub.precio || 0) : `$${pub.precio || 0}`;
     const fecha = formatRelativeTime ? formatRelativeTime(pub.fecha_publicacion || pub.createdAt) : '';
 
-    // Opción 1: Usar Web Component <publicacion-card> (Micro-Frontend)
-    // Descomenta esto para usar el componente encapsulado:
-    /*
     return `
-        <publicacion-card
-            pub-id="${pub._id}"
-            titulo="${pub.titulo || ''}"
-            descripcion="${(pub.descripcion || '').replace(/"/g, '&quot;')}"
-            precio="${pub.precio || 0}"
-            imagen="${imagen}"
-            categoria="${pub.categoria || 'Sin categoría'}"
-            tipo="${pub.tipo_publicacion || 'producto'}"
-            fecha="${pub.fecha_publicacion || pub.createdAt || ''}"
-            estado="${pub.estado || 'activo'}">
-        </publicacion-card>
-    `;
-    */
-
-    // Opción 2: Card tradicional (mantiene estilos globales)
-    return `
-        <div class="publicacion-card card" data-id="${pub._id}" style="cursor: pointer; padding: 0; overflow: hidden;">
-            <div style="position: relative;">
+        <div class="publicacion-card card" data-id="${pub._id}">
+            <div class="publicacion-card-imagen">
                 <img src="${imagen}" alt="${pub.titulo}" 
-                     style="width: 100%; height: 180px; object-fit: cover;"
                      onerror="this.src='/imgs/default-product.svg'">
                 ${pub.tipo_publicacion === 'servicio' ?
-            '<span class="badge badge-accent" style="position: absolute; top: 0.75rem; left: 0.75rem;">Servicio</span>' :
+            '<span class="badge badge-accent publicacion-badge">Servicio</span>' :
             ''}
                 ${pub.estado === 'vendido' ?
-            '<div style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;"><span class="badge" style="background: var(--error); color: white; font-size: 1rem;">Vendido</span></div>' :
+            '<div class="publicacion-vendido"><span class="badge badge-error">Vendido</span></div>' :
             ''}
             </div>
-            <div style="padding: 1rem;">
-                <p style="font-size: 0.8rem; color: var(--gray-500); margin-bottom: 0.25rem;">
-                    ${pub.categoria || 'Sin categoría'}
+            <div class="publicacion-card-body">
+                <p class="publicacion-categoria">
+                    ${pub.categoria || 'Sin categoria'}
                 </p>
-                <h3 style="margin: 0 0 0.5rem; font-size: 1rem; font-weight: 600; 
-                           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <h3 class="publicacion-titulo">
                     ${pub.titulo}
                 </h3>
-                <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.75rem;
-                          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                <p class="publicacion-descripcion">
                     ${pub.descripcion || ''}
                 </p>
-                <div class="flex items-center justify-between">
-                    <span style="font-size: 1.125rem; font-weight: 700; color: var(--primary);">
+                <div class="publicacion-footer">
+                    <span class="publicacion-precio">
                         ${precio}
                     </span>
-                    <span style="font-size: 0.75rem; color: var(--gray-400);">${fecha}</span>
+                    <span class="publicacion-fecha">${fecha}</span>
                 </div>
             </div>
         </div>
     `;
 }
 
-// ============= CREAR PUBLICACIÓN =============
 function initCrearPublicacion() {
     const form = document.getElementById("createPublicacionForm");
     if (!form) return;
@@ -258,29 +217,24 @@ function initCrearPublicacion() {
     const descripcionCount = document.getElementById("descripcionCount");
 
     let imagenesBase64 = [];
-    // Si venimos a editar, routeParams puede contener el id
     const editarId = window.routeParams?.id;
     let isEditing = false;
 
-    // Si es edición, cargar publicación y prellenar formulario
     if (editarId) {
         isEditing = true;
-        // Cargar publicación
         (async function cargarParaEditar() {
             try {
                 const headers = {};
                 if (window.AuthState?.token) headers['Authorization'] = `Bearer ${window.AuthState.token}`;
                 const res = await fetch(`/api/publicaciones/${editarId}`, { headers });
                 const pub = await res.json();
-                if (!res.ok) throw new Error(pub.message || 'No se pudo cargar la publicación');
+                if (!res.ok) throw new Error(pub.message || 'No se pudo cargar la publicacion');
 
-                // Prefill campos
                 document.getElementById('titulo').value = pub.titulo || '';
                 document.getElementById('descripcion').value = pub.descripcion || '';
                 if (pub.categoria) document.getElementById('categoria').value = pub.categoria;
                 if (pub.precio !== undefined && document.getElementById('precio')) document.getElementById('precio').value = pub.precio;
 
-                // Tipo
                 if (pub.tipo_publicacion === 'servicio') {
                     const tipoServicio = document.getElementById('tipoServicio');
                     if (tipoServicio) tipoServicio.checked = true;
@@ -310,7 +264,6 @@ function initCrearPublicacion() {
                 if (btnTexto) btnTexto.textContent = 'Guardar cambios';
 
             } catch (err) {
-                console.error('Error cargando publicación para editar:', err);
                 showToast(err.message || 'No se pudo cargar la publicación', 'error');
                 navigateTo('/publicaciones');
             }
@@ -410,10 +363,9 @@ function initCrearPublicacion() {
         if (!previewContainer) return;
 
         previewContainer.innerHTML = imagenesBase64.map((base64, index) => `
-            <div class="image-preview" style="position: relative; display: inline-block;">
-                <img src="${base64}" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md);">
-                <button type="button" class="btn btn-icon" 
-                        style="position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: var(--error); color: white; font-size: 12px; padding: 0; min-width: auto;"
+            <div class="image-preview-wrapper">
+                <img src="${base64}" alt="Preview" class="image-preview-img">
+                <button type="button" class="btn btn-icon image-preview-remove"
                         onclick="removeImageAtIndex(${index})">
                     ✕
                 </button>
@@ -532,7 +484,6 @@ function initCrearPublicacion() {
             }
 
         } catch (err) {
-            console.error(isEditing ? "Error actualizando publicación:" : "Error creando publicación:", err);
             showToast(err.message || (isEditing ? 'Error al actualizar la publicación' : 'Error al crear la publicación'), 'error');
             if (btn) btn.disabled = false;
             if (btnTexto) btnTexto.classList.remove("hidden");
@@ -541,8 +492,7 @@ function initCrearPublicacion() {
     });
 }
 
-// ============= DETALLE PUBLICACIÓN =============
-var publicacionActual = null; // Para guardar la publicación actual
+var publicacionActual = null;
 
 async function initDetallePublicacion() {
     const params = window.routeParams || {};
@@ -625,8 +575,7 @@ async function initDetallePublicacion() {
                 galeriaThumbs.innerHTML = imagenes.map((img, i) => `
                     <img src="${img}" alt="Imagen ${i + 1}" 
                          onclick="cambiarImagen('${img}', this)"
-                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; 
-                                cursor: pointer; border: 2px solid ${i === 0 ? 'var(--primary)' : 'transparent'};">
+                         class="gallery-thumb ${i === 0 ? 'active' : ''}">
                 `).join("");
             } else {
                 galeriaThumbs.style.display = 'none';
@@ -643,7 +592,6 @@ async function initDetallePublicacion() {
                     vendedor = await resVendedor.json();
                 }
             } catch (e) {
-                console.log("No se pudo cargar vendedor:", e);
             }
         }
 
@@ -662,8 +610,8 @@ async function initDetallePublicacion() {
         if (vendedorRating) {
             const rep = parseFloat(vendedor.reputacion);
             vendedorRating.innerHTML = `
-                <span style="color: var(--warning); font-size: 1.1rem;">★</span>
-                <span style="font-weight: 600;">${isNaN(rep) ? 'Nuevo' : rep.toFixed(1)}</span>
+                <span class="vendor-rating-star">★</span>
+                <span class="vendor-rating-value">${isNaN(rep) ? 'Nuevo' : rep.toFixed(1)}</span>
             `;
         }
         if (vendedorCarrera) vendedorCarrera.textContent = vendedor.carrera || '';
@@ -713,13 +661,11 @@ async function initDetallePublicacion() {
         initFormMarcarVenta();
 
     } catch (err) {
-        console.error("Error cargando detalle:", err);
         if (loading) loading.classList.add("hidden");
         if (errorState) errorState.classList.remove("hidden");
     }
 }
 
-// Abrir modal de marcar venta
 function abrirModalVenta() {
     const modal = document.getElementById("modalMarcarVenta");
     if (modal) {
@@ -772,9 +718,7 @@ function initFormMarcarVenta() {
 
     // Buscar comprador por ITSON ID
     async function buscarComprador(itsonId) {
-        // Normalizar a 11 dígitos con ceros al inicio
         const itsonIdNormalizado = itsonId.padStart(11, '0');
-        console.log('Buscando ITSON ID:', itsonId, '-> normalizado:', itsonIdNormalizado);
         
         try {
             // Buscar con el ID normalizado a 11 caracteres
@@ -804,8 +748,6 @@ function initFormMarcarVenta() {
                 if (infoNoRegistrado) infoNoRegistrado.classList.remove("hidden");
             }
         } catch (err) {
-            console.log("Error buscando usuario:", err);
-            // Mostrar como no registrado si hay error
             if (infoComprador) infoComprador.classList.add("hidden");
             if (infoNoRegistrado) infoNoRegistrado.classList.remove("hidden");
         }
@@ -875,7 +817,6 @@ function initFormMarcarVenta() {
             }
 
         } catch (err) {
-            console.error("Error registrando venta:", err);
             if (ventaError) {
                 ventaError.textContent = err.message || "Error al registrar la venta";
                 ventaError.classList.remove("hidden");
@@ -893,14 +834,13 @@ window.cambiarImagen = function (src, thumb) {
     const imagenPrincipal = document.getElementById("mainImage");
     if (imagenPrincipal) imagenPrincipal.src = src;
 
-    // Actualizar bordes de thumbnails
     const thumbs = document.getElementById("thumbnails");
     if (thumbs) {
         thumbs.querySelectorAll('img').forEach(t => {
-            t.style.borderColor = 'transparent';
+            t.classList.remove('active');
         });
     }
-    if (thumb) thumb.style.borderColor = 'var(--primary)';
+    if (thumb) thumb.classList.add('active');
 };
 
 // Iniciar chat con vendedor
@@ -935,7 +875,6 @@ async function iniciarChatConVendedor(vendedorId, publicacionId) {
 
         navigateTo(`/chats/${data._id || data.chat?._id}`);
     } catch (err) {
-        console.error("Error iniciando chat:", err);
         showToast(err.message || 'Error al iniciar conversación', 'error');
     }
 }

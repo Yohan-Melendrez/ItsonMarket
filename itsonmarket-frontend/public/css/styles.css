@@ -2564,3 +2564,373 @@ body.auth-page-active .main-content {
 .btn-ojo:hover {
     color: #1e40af;
 }
+
+/* ============================================
+   PUBLICACION CARD STYLES
+   ============================================ */
+
+.publicacion-card {
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+}
+
+.publicacion-card-imagen {
+    position: relative;
+}
+
+.publicacion-card-imagen img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.publicacion-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+}
+
+.publicacion-vendido {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.publicacion-vendido .badge {
+    background: var(--error);
+    color: white;
+    font-size: 1rem;
+}
+
+.publicacion-card-body {
+    padding: 1rem;
+}
+
+.publicacion-categoria {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin-bottom: 0.25rem;
+}
+
+.publicacion-titulo {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.publicacion-descripcion {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.publicacion-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.publicacion-precio {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.publicacion-fecha {
+    font-size: 0.75rem;
+    color: var(--gray-400);
+}
+
+/* Mini card para listas de publicaciones */
+.publicacion-mini-card {
+    display: block;
+    text-decoration: none;
+    margin-bottom: 1rem;
+}
+
+.publicacion-mini-content {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.publicacion-mini-imagen {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.publicacion-mini-info {
+    flex: 1;
+}
+
+.publicacion-mini-info h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--gray-800);
+}
+
+.publicacion-mini-precio {
+    margin: 0;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Empty state message styles */
+.empty-state-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--gray-500);
+}
+
+.empty-state-icon {
+    margin: 0 auto 1rem;
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-weight: 500;
+}
+
+.empty-state-subtitle {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+/* Error page styles */
+.error-page-container {
+    padding: 4rem 1rem;
+}
+
+.error-page-code {
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--gray-200);
+    margin: 0;
+}
+
+.error-page-title {
+    margin: 1rem 0;
+}
+
+.error-page-message {
+    color: var(--gray-500);
+    margin-bottom: 2rem;
+}
+
+/* User publication cards */
+.user-pub-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.user-pub-image-wrapper {
+    position: relative;
+}
+
+.user-pub-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.user-pub-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+.user-pub-body {
+    padding: 1rem;
+}
+
+.user-pub-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+}
+
+.user-pub-price {
+    color: var(--primary);
+    font-weight: 600;
+    margin: 0;
+}
+
+.btn-delete {
+    background: var(--error);
+    color: white;
+}
+
+/* Review cards */
+.review-card {
+    margin-bottom: 1rem;
+    padding: 1.25rem;
+}
+
+.review-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.review-content {
+    flex: 1;
+}
+
+.review-author {
+    margin: 0;
+}
+
+.review-stars {
+    color: var(--warning);
+}
+
+.review-comment {
+    color: var(--gray-600);
+    margin: 0.5rem 0;
+}
+
+.review-date {
+    font-size: 0.75rem;
+    color: var(--gray-400);
+}
+
+/* Transaction cards */
+.trans-card {
+    padding: 0;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.trans-image-wrapper {
+    width: 140px;
+    min-height: 140px;
+    background: var(--gray-100);
+}
+
+.trans-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.trans-body {
+    flex: 1;
+    padding: 1.25rem;
+}
+
+.trans-content {
+    flex: 1;
+}
+
+.trans-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+}
+
+.trans-subtitle {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+    margin: 0;
+}
+
+.trans-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+}
+
+.trans-divider {
+    border-top: 1px solid var(--gray-200);
+}
+
+.trans-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.trans-user-label {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin: 0;
+}
+
+.trans-user-name {
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Spinner centered */
+.spinner-centered {
+    margin: 2rem auto;
+}
+
+.spinner-grid {
+    grid-column: 1/-1;
+    margin: 2rem auto;
+}
+
+/* Image preview */
+.image-preview-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.image-preview-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+}
+
+.image-preview-remove {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: var(--error);
+    color: white;
+    font-size: 12px;
+    padding: 0;
+    min-width: auto;
+}
+
+/* Vendor rating */
+.vendor-rating-star {
+    color: var(--warning);
+    font-size: 1.1rem;
+}
+
+.vendor-rating-value {
+    font-weight: 600;
+}
+
+/* Thumbnail gallery */
+.gallery-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.gallery-thumb.active {
+    border-color: var(--primary);
+}

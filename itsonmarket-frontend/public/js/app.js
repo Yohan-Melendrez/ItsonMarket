@@ -1,14 +1,7 @@
-/**
- * ItsonMarket - Single Page Application Router
- * Sistema de navegación y estado de la aplicación
- */
-
 const app = document.getElementById("app");
 
-// ============= API Configuration =============
 const API_BASE = '/api';
 
-// ============= Routes Configuration =============
 const routes = {
   "/": {
     view: "/login.html",
@@ -80,7 +73,6 @@ const routes = {
   },
 };
 
-// ============= Auth State Management =============
 const AuthState = {
   token: localStorage.getItem('token'),
   user: JSON.parse(localStorage.getItem('user') || 'null'),
@@ -111,7 +103,6 @@ const AuthState = {
   }
 };
 
-// ============= API Helper =============
 async function api(endpoint, options = {}) {
   const config = {
     headers: {
@@ -140,12 +131,10 @@ async function api(endpoint, options = {}) {
     
     return data;
   } catch (error) {
-    console.error('API Error:', error);
     throw error;
   }
 }
 
-// ============= Toast Notifications =============
 function showToast(message, type = 'info', duration = 4000) {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -184,7 +173,6 @@ function showToast(message, type = 'info', duration = 4000) {
   }, duration);
 }
 
-// ============= Navbar Management =============
 function updateNavbar() {
   const navUserMenu = document.getElementById('nav-user-menu');
   const navAuthLinks = document.getElementById('nav-auth-links');
@@ -202,7 +190,6 @@ function updateNavbar() {
   }
 }
 
-// Toggle dropdown
 function toggleUserDropdown() {
   const dropdown = document.getElementById('user-dropdown');
   if (dropdown) {
@@ -210,7 +197,6 @@ function toggleUserDropdown() {
   }
 }
 
-// Close dropdown when clicking outside
 document.addEventListener('click', (e) => {
   const dropdown = document.getElementById('user-dropdown');
   const trigger = document.getElementById('dropdown-trigger');
@@ -219,7 +205,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Mobile menu toggle
 function toggleMobileMenu() {
   const mobileMenu = document.getElementById('mobile-menu');
   if (mobileMenu) {
@@ -227,7 +212,6 @@ function toggleMobileMenu() {
   }
 }
 
-// ============= Script Management =============
 function removeOldScripts() {
   document.querySelectorAll("script[data-dynamic]").forEach((s) => s.remove());
 }
@@ -237,16 +221,12 @@ function loadScript(path, params = {}) {
   
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = path + '?t=' + Date.now(); // Cache busting
+    script.src = path + '?t=' + Date.now();
     script.dataset.dynamic = "true";
     
-    // Pass route params to script
     window.routeParams = params;
     
     script.onload = () => {
-      console.log("Script cargado:", path);
-      
-      // Init functions based on script
       if (path.includes("register.js") && typeof initRegister === "function") {
         initRegister();
       }
@@ -274,7 +254,6 @@ function loadScript(path, params = {}) {
   });
 }
 
-// ============= Route Matching =============
 function matchRoute(path) {
   // Exact match first
   if (routes[path]) {
@@ -301,7 +280,6 @@ function matchRoute(path) {
   return null;
 }
 
-// ============= Navigation =============
 function navigateTo(path) {
   window.location.hash = '#' + path;
 }
@@ -321,10 +299,10 @@ async function loadRoute() {
   if (!matched) {
     app.innerHTML = `
       <div class="main-content">
-        <div class="container text-center" style="padding: 4rem 1rem;">
-          <h1 style="font-size: 6rem; font-weight: 800; color: var(--gray-200); margin: 0;">404</h1>
-          <h2 style="margin: 1rem 0;">Página no encontrada</h2>
-          <p style="color: var(--gray-500); margin-bottom: 2rem;">La página que buscas no existe o ha sido movida.</p>
+        <div class="container text-center error-page-container">
+          <h1 class="error-page-code">404</h1>
+          <h2 class="error-page-title">Página no encontrada</h2>
+          <p class="error-page-message">La página que buscas no existe o ha sido movida.</p>
           <a href="#/" class="btn btn-primary">Volver al inicio</a>
         </div>
       </div>
@@ -365,12 +343,11 @@ async function loadRoute() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       app.innerHTML = await res.text();
     } catch (error) {
-      console.error('Error loading view:', error);
       app.innerHTML = `
         <div class="main-content">
-          <div class="container text-center" style="padding: 4rem 1rem;">
-            <h2>Error al cargar la página</h2>
-            <p style="color: var(--gray-500);">Intenta recargar la página.</p>
+          <div class="container text-center error-page-container">
+            <h2 class="error-page-title">Error al cargar la página</h2>
+            <p class="error-page-message">Intenta recargar la página.</p>
             <button onclick="location.reload()" class="btn btn-primary mt-4">Recargar</button>
           </div>
         </div>
@@ -395,7 +372,6 @@ async function loadRoute() {
   window.scrollTo(0, 0);
 }
 
-// ============= Utility Functions =============
 function formatCurrency(amount) {
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
@@ -439,7 +415,6 @@ function debounce(func, wait) {
   };
 }
 
-// Password visibility toggle
 function togglePasswordVisibility(inputId, button) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -456,14 +431,12 @@ function togglePasswordVisibility(inputId, button) {
   }
 }
 
-// ============= Initialize =============
 window.addEventListener("hashchange", loadRoute);
 window.addEventListener("load", () => {
   updateNavbar();
   loadRoute();
 });
 
-// Expose globally needed functions
 window.AuthState = AuthState;
 window.api = api;
 window.showToast = showToast;

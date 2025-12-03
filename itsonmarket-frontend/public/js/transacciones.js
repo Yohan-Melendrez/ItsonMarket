@@ -1,7 +1,3 @@
-/**
- * Transacciones Module - ItsonMarket
- */
-
 let transaccionesData = [];
 let filtroTransacciones = {
     tipo: 'todas',
@@ -11,8 +7,6 @@ let filtroTransacciones = {
 let calificacionSeleccionada = 0;
 
 function initTransacciones() {
-    console.log("initTransacciones() inicializado");
-    
     if (!window.AuthState?.isLoggedIn()) {
         navigateTo('/login');
         return;
@@ -24,7 +18,6 @@ function initTransacciones() {
 }
 
 function initFiltros() {
-    // Tabs de tipo
     const tabs = document.querySelectorAll('.tabs .tab');
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -38,7 +31,6 @@ function initFiltros() {
         });
     });
 
-    // Filtro de estado
     const filtroEstado = document.getElementById('filtroEstado');
     if (filtroEstado) {
         filtroEstado.addEventListener('change', () => {
@@ -47,7 +39,6 @@ function initFiltros() {
         });
     }
 
-    // Filtro de mes
     const filtroMes = document.getElementById('filtroMes');
     if (filtroMes) {
         filtroMes.addEventListener('change', () => {
@@ -56,7 +47,6 @@ function initFiltros() {
         });
     }
 
-    // Limpiar filtros
     const btnLimpiar = document.getElementById('btnLimpiarFiltros');
     if (btnLimpiar) {
         btnLimpiar.addEventListener('click', () => {
@@ -79,7 +69,6 @@ async function cargarTransacciones() {
     if (empty) empty.classList.add('hidden');
 
     try {
-        // Usar el endpoint correcto para mis transacciones
         const res = await fetch('/api/transacciones/mis-transacciones', {
             headers: {
                 'Authorization': `Bearer ${window.AuthState.token}`
@@ -98,7 +87,6 @@ async function cargarTransacciones() {
         renderTransacciones();
 
     } catch (err) {
-        console.error("Error cargando transacciones:", err);
         if (loading) loading.classList.add('hidden');
         if (lista) {
             lista.innerHTML = `
@@ -121,31 +109,19 @@ function renderTransacciones() {
     const userId = window.AuthState.user?._id;
     const userItsonId = window.AuthState.user?.itson_id;
 
-    console.log('Renderizando transacciones:', transaccionesData.length);
-    console.log('User ID:', userId);
-    console.log('User ITSON ID:', userItsonId);
+    if (!lista) return;
 
-    if (!lista) {
-        console.log('No se encontró el elemento transaccionesLista');
-        return;
-    }
-
-    // Filtrar
     let filtered = transaccionesData.filter(t => {
-        // Determinar si soy comprador o vendedor
         const soyComprador = t.comprador_id?._id === userId || 
                             t.comprador_id === userId || 
                             t.comprador_itson_id === userItsonId;
         const soyVendedor = t.vendedor_id?._id === userId || t.vendedor_id === userId;
 
-        // Filtro por tipo (compra/venta)
         if (filtroTransacciones.tipo === 'compras' && !soyComprador) return false;
         if (filtroTransacciones.tipo === 'ventas' && !soyVendedor) return false;
 
-        // Filtro por estado
         if (filtroTransacciones.estado && t.estado !== filtroTransacciones.estado) return false;
 
-        // Filtro por mes
         if (filtroTransacciones.mes) {
             const fecha = new Date(t.fecha_transaccion || t.createdAt);
             const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
@@ -155,10 +131,7 @@ function renderTransacciones() {
         return true;
     });
 
-    // Ordenar por fecha (más recientes primero)
     filtered.sort((a, b) => new Date(b.fecha_transaccion || b.createdAt) - new Date(a.fecha_transaccion || a.createdAt));
-
-    console.log('Transacciones filtradas:', filtered.length);
 
     if (filtered.length === 0) {
         lista.innerHTML = '';
@@ -172,7 +145,6 @@ function renderTransacciones() {
 }
 
 function crearTransaccionCard(trans, userId, userItsonId) {
-    // Determinar si soy el comprador
     const esCompra = trans.comprador_id?._id === userId || 
                      trans.comprador_id === userId || 
                      trans.comprador_itson_id === userItsonId;
@@ -181,7 +153,6 @@ function crearTransaccionCard(trans, userId, userItsonId) {
     const contraparte = esCompra ? trans.vendedor_id : trans.comprador_id;
     const imagen = publicacion.detalles?.imagenes?.[0] || '/imgs/default-product.svg';
     
-    // Para compradores no registrados mostrar el ITSON ID
     const contraparteNombre = contraparte?.nombre || 
                               (esCompra ? 'Vendedor' : `ID: ${trans.comprador_itson_id || 'Desconocido'}`);
 
@@ -201,7 +172,6 @@ function crearTransaccionCard(trans, userId, userItsonId) {
         'cancelada': 'Cancelada'
     };
 
-    // Fecha formateada
     const fecha = trans.fecha_transaccion || trans.createdAt;
     const fechaFormateada = fecha ? formatDate(fecha) : 'Fecha desconocida';
 
@@ -221,16 +191,16 @@ function crearTransaccionCard(trans, userId, userItsonId) {
     }
 
     return `
-        <div class="card" style="padding: 0; margin-bottom: 1rem; overflow: hidden;">
+        <div class="card trans-card">
             <div class="flex">
-                <div style="width: 140px; min-height: 140px; background: var(--gray-100);">
+                <div class="trans-image-wrapper">
                     <img src="${imagen}" alt="${publicacion.titulo || 'Producto'}" 
-                         style="width: 100%; height: 100%; object-fit: cover;"
+                         class="trans-image"
                          onerror="this.src='/imgs/default-product.svg'">
                 </div>
-                <div style="flex: 1; padding: 1.25rem;">
+                <div class="trans-body">
                     <div class="flex items-start justify-between gap-4">
-                        <div style="flex: 1;">
+                        <div class="trans-content">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="badge ${esCompra ? 'badge-primary' : 'badge-accent'}">
                                     ${esCompra ? 'Compra' : 'Venta'}
@@ -239,29 +209,29 @@ function crearTransaccionCard(trans, userId, userItsonId) {
                                     ${estadoLabels[trans.estado] || trans.estado}
                                 </span>
                             </div>
-                            <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem;">
+                            <h3 class="trans-title">
                                 ${publicacion.titulo || 'Publicación'}
                             </h3>
-                            <p style="font-size: 0.85rem; color: var(--gray-500); margin: 0;">
+                            <p class="trans-subtitle">
                                 ${fechaFormateada}
                             </p>
                         </div>
                         <div class="text-right">
-                            <p style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin: 0;">
+                            <p class="trans-price">
                                 ${formatCurrency(trans.monto || publicacion.precio || 0)}
                             </p>
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-3 mt-4 pt-4" style="border-top: 1px solid var(--gray-200);">
+                    <div class="flex items-center gap-3 mt-4 pt-4 trans-divider">
                         <img src="${contraparte?.foto || '/imgs/default-avatar.svg'}" alt="" 
-                             style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;"
+                             class="trans-user-avatar"
                              onerror="this.src='/imgs/default-avatar.svg'">
-                        <div style="flex: 1;">
-                            <p style="font-size: 0.75rem; color: var(--gray-500); margin: 0;">
+                        <div class="trans-content">
+                            <p class="trans-user-label">
                                 ${esCompra ? 'Vendedor' : 'Comprador'}
                             </p>
-                            <p style="font-weight: 500; margin: 0;">
+                            <p class="trans-user-name">
                                 ${contraparteNombre}
                             </p>
                         </div>
@@ -292,7 +262,6 @@ window.aceptarTransaccion = async function(id) {
         showToast('Transacción aceptada', 'success');
         cargarTransacciones();
     } catch (err) {
-        console.error(err);
         showToast('Error al aceptar la transacción', 'error');
     }
 };
@@ -315,7 +284,6 @@ window.cancelarTransaccion = async function(id) {
         showToast('Transacción cancelada', 'info');
         cargarTransacciones();
     } catch (err) {
-        console.error(err);
         showToast('Error al cancelar la transacción', 'error');
     }
 };
@@ -336,12 +304,10 @@ window.completarTransaccion = async function(id) {
         showToast('¡Transacción completada!', 'success');
         cargarTransacciones();
     } catch (err) {
-        console.error(err);
         showToast('Error al completar la transacción', 'error');
     }
 };
 
-// Calificación
 function initCalificacion() {
     const estrellas = document.querySelectorAll('.btn-estrella');
     const textos = ['Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'];
@@ -444,7 +410,6 @@ async function enviarCalificacion() {
         cerrarModalCalificar();
         cargarTransacciones();
     } catch (err) {
-        console.error('Error calificando:', err);
         showToast(err.message || 'Error al enviar la calificación', 'error');
     }
 }
