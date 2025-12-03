@@ -63,14 +63,35 @@
                         </div>
                     </a>
 
-                    <!-- Botones -->
-                    <div class="flex gap-3">
+                    <!-- Botones para visitantes (no dueño) -->
+                    <div id="botonesVisitante" class="flex gap-3 hidden">
                         <button id="btnContactar" class="btn btn-primary" style="flex: 1;">
-                            Contactar
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin-right: 0.5rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Enviar mensaje
                         </button>
-                        <button id="btnComprar" class="btn btn-success" style="flex: 1;">
-                            Comprar
-                        </button>
+                    </div>
+
+                    <!-- Botones para el dueño de la publicación -->
+                    <div id="botonesDueno" class="hidden">
+                        <div class="flex gap-3">
+                            <button id="btnMarcarVenta" class="btn btn-success" style="flex: 1;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin-right: 0.5rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Marcar venta
+                            </button>
+                            <a id="btnEditarPub" href="#" class="btn btn-outline" style="flex: 1;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin-right: 0.5rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Editar
+                            </a>
+                        </div>
+                        <p style="text-align: center; font-size: 0.85rem; color: var(--gray-500); margin-top: 1rem;">
+                            Esta es tu publicación. Marca la venta cuando realices una transacción.
+                        </p>
                     </div>
 
                     <!-- Fecha -->
@@ -87,6 +108,65 @@
             <h3>Publicación no encontrada</h3>
             <p>La publicación que buscas no existe o ha sido eliminada.</p>
             <a href="#/publicaciones" class="btn btn-primary">Volver a publicaciones</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Marcar Venta -->
+<div id="modalMarcarVenta" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Registrar Venta</h3>
+            <button type="button" class="btn btn-icon" onclick="cerrarModalVenta()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+                Ingresa el ID del estudiante que realizó la compra. Si no está registrado en el sistema, la transacción quedará vinculada para cuando se registre.
+            </p>
+            
+            <form id="formMarcarVenta">
+                <div class="form-group">
+                    <label for="compradorItsonId" class="form-label">ITSON ID del comprador *</label>
+                    <input type="text" id="compradorItsonId" class="form-input" 
+                           placeholder="Ej: 123456" required
+                           pattern="[0-9]{1,11}" maxlength="11"
+                           style="font-size: 1.1rem; letter-spacing: 2px; text-align: center;">
+                    <p style="font-size: 0.8rem; color: var(--gray-500); margin-top: 0.5rem;">
+                        Ingresa el ID estudiantil (sin ceros iniciales)
+                    </p>
+                </div>
+
+                <div id="infoComprador" class="hidden" style="padding: 1rem; background: var(--gray-50); border-radius: var(--radius-md); margin-bottom: 1rem;">
+                    <div class="flex items-center gap-3">
+                        <img id="compradorAvatar" src="/imgs/default-avatar.svg" alt="" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <p id="compradorNombre" style="font-weight: 600; margin: 0;"></p>
+                            <p id="compradorCarrera" style="font-size: 0.85rem; color: var(--gray-500); margin: 0;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="infoCompradorNoRegistrado" class="hidden" style="padding: 1rem; background: var(--warning-light, #fef3c7); border-radius: var(--radius-md); margin-bottom: 1rem;">
+                    <p style="margin: 0; color: var(--warning-dark, #92400e); font-size: 0.9rem;">
+                        <strong>Usuario no registrado.</strong> La transacción se guardará y aparecerá cuando este estudiante se registre en ItsonMarket.
+                    </p>
+                </div>
+
+                <div id="ventaError" class="hidden" style="padding: 0.75rem; background: var(--error-light, #fee2e2); border-radius: var(--radius-md); margin-bottom: 1rem; color: var(--error);">
+                </div>
+
+                <button type="submit" class="btn btn-success" style="width: 100%;" id="btnConfirmarVenta">
+                    <span id="btnVentaTexto">Confirmar Venta</span>
+                    <span id="btnVentaLoading" class="hidden">
+                        <div class="spinner spinner-sm"></div>
+                    </span>
+                </button>
+            </form>
         </div>
     </div>
 </div>

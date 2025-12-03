@@ -91,13 +91,14 @@ class PublicacionService {
       fechaHasta: params.fechaHasta,
       sort: params.sort || '-fecha_publicacion',
       page,
-      limit
+      limit,
+      includeHidden: params.includeHidden || false
     });
   }
 
   async listBySeller(vendedor_id, opts = {}) {
-  
-    return this.list({ ...opts, vendedor_id });
+    // Cuando se lista por vendedor, incluir publicaciones ocultas (son del propio vendedor)
+    return this.list({ ...opts, vendedor_id, includeHidden: true });
   }
 
   async searchByTitle(titulo, opts = {}) {

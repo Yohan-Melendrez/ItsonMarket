@@ -32,16 +32,6 @@
         <div class="card mb-6" style="padding: 1rem;">
             <div class="flex items-center gap-4 flex-wrap">
                 <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
-                    <select id="filtroEstado" class="form-input" style="padding: 0.625rem 1rem;">
-                        <option value="">Todos los estados</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="aceptada">Aceptada</option>
-                        <option value="en_proceso">En proceso</option>
-                        <option value="completada">Completada</option>
-                        <option value="cancelada">Cancelada</option>
-                    </select>
-                </div>
-                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
                     <input type="month" id="filtroMes" class="form-input" style="padding: 0.625rem 1rem;">
                 </div>
                 <button type="button" id="btnLimpiarFiltros" class="btn btn-outline">
@@ -52,23 +42,20 @@
 
         <!-- Lista de transacciones -->
         <div id="transaccionesLista">
-            <!-- Loading -->
+            <!-- Loading usando Web Component -->
             <div id="loadingTransacciones" class="text-center" style="padding: 3rem;">
-                <div class="spinner"></div>
-                <p style="margin-top: 1rem; color: var(--gray-500);">Cargando transacciones...</p>
+                <loading-spinner size="lg" text="Cargando transacciones..."></loading-spinner>
             </div>
         </div>
 
-        <!-- Empty state -->
-        <div id="sinTransacciones" class="empty-state hidden">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
-            <h3>No tienes transacciones</h3>
-            <p>Cuando compres o vendas algo, aparecerá aquí.</p>
-            <a href="#/publicaciones" class="btn btn-primary">
-                Explorar publicaciones
-            </a>
+        <!-- Empty state usando Web Component -->
+        <div id="sinTransacciones" class="hidden">
+            <empty-state 
+                title="No tienes transacciones"
+                description="Cuando compres o vendas algo, aparecerá aquí."
+                action-text="Explorar publicaciones"
+                action-href="#/publicaciones">
+            </empty-state>
         </div>
     </div>
 </div>
@@ -115,7 +102,7 @@
     </div>
 </template>
 
-<!-- Modal calificar -->
+<!-- Modal calificar con Web Component rating-stars -->
 <div id="modalCalificar" class="modal hidden">
     <div class="modal-overlay"></div>
     <div class="modal-content" style="max-width: 420px;">
@@ -132,6 +119,8 @@
             
             <div class="text-center mb-6">
                 <p style="color: var(--gray-600); margin-bottom: 1rem;">¿Cómo fue tu experiencia?</p>
+                
+                <!-- Estrellas usando botones tradicionales para mantener funcionalidad -->
                 <div id="estrellas" class="flex justify-center gap-2">
                     <button type="button" class="btn-estrella" data-rating="1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">

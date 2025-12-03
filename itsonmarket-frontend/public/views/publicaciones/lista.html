@@ -45,22 +45,19 @@
             <!-- Las tarjetas se cargan dinámicamente -->
         </div>
 
-        <!-- Estado vacío -->
-        <div id="emptyState" class="empty-state hidden">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-            <h3>No hay publicaciones</h3>
-            <p>Aún no hay publicaciones disponibles. ¡Sé el primero en publicar!</p>
-            <a href="#/publicaciones/crear" class="btn btn-primary">
-                Crear mi primera publicación
-            </a>
+        <!-- Estado vacío usando Web Component -->
+        <div id="emptyState" class="hidden">
+            <empty-state 
+                title="No hay publicaciones"
+                description="Aún no hay publicaciones disponibles. ¡Sé el primero en publicar!"
+                action-text="Crear mi primera publicación"
+                action-href="#/publicaciones/crear">
+            </empty-state>
         </div>
 
-        <!-- Loading -->
+        <!-- Loading usando Web Component -->
         <div id="loadingState" class="text-center p-8">
-            <div class="loader loader-lg"></div>
-            <p class="mt-4 text-muted">Cargando publicaciones...</p>
+            <loading-spinner size="lg" text="Cargando publicaciones..."></loading-spinner>
         </div>
 
         <!-- Paginación -->

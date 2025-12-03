@@ -12,13 +12,6 @@ const { crearUsuarioValidator, actualizarUsuarioValidator } = require('../valida
  */
 router.post('/', crearUsuarioValidator, handleValidationErrors, controller.crearUsuario);
 
-/**
- * @route GET /api/usuarios/:id
- * @desc Obtener un usuario por ID o ITSON ID (perfil público)
- * @access Public
- */
-router.get('/:id', controller.obtenerUsuarioPorId);
-
 // A partir de aquí requieren autenticación
 router.use(authMiddleware);
 
@@ -31,10 +24,17 @@ router.get('/', controller.obtenerUsuarios);
 
 /**
  * @route GET /api/usuarios/buscar
- * @desc Buscar usuarios por nombre
+ * @desc Buscar usuarios por nombre o ITSON ID
  * @access Private
  */
 router.get('/buscar', controller.buscarUsuarios);
+
+/**
+ * @route GET /api/usuarios/:id
+ * @desc Obtener un usuario por ID o ITSON ID
+ * @access Private
+ */
+router.get('/:id', controller.obtenerUsuarioPorId);
 
 /**
  * @route PUT /api/usuarios/:id

@@ -79,7 +79,8 @@ async function cargarTransacciones() {
     if (empty) empty.classList.add('hidden');
 
     try {
-        const res = await fetch('/api/transacciones', {
+        // Usar el endpoint correcto para mis transacciones
+        const res = await fetch('/api/transacciones/mis-transacciones', {
             headers: {
                 'Authorization': `Bearer ${window.AuthState.token}`
             }
@@ -89,7 +90,7 @@ async function cargarTransacciones() {
 
         if (!res.ok) throw new Error(data.message || 'Error al cargar transacciones');
 
-        transaccionesData = Array.isArray(data) ? data : (data.transacciones || []);
+        transaccionesData = Array.isArray(data) ? data : (data.data || data.transacciones || []);
         
         if (countTodas) countTodas.textContent = transaccionesData.length;
         if (loading) loading.classList.add('hidden');
@@ -118,24 +119,35 @@ function renderTransacciones() {
     const lista = document.getElementById('transaccionesLista');
     const empty = document.getElementById('sinTransacciones');
     const userId = window.AuthState.user?._id;
+    const userItsonId = window.AuthState.user?.itson_id;
 
-    if (!lista) return;
+    console.log('Renderizando transacciones:', transaccionesData.length);
+    console.log('User ID:', userId);
+    console.log('User ITSON ID:', userItsonId);
+
+    if (!lista) {
+        console.log('No se encontró el elemento transaccionesLista');
+        return;
+    }
 
     // Filtrar
     let filtered = transaccionesData.filter(t => {
+        // Determinar si soy comprador o vendedor
+        const soyComprador = t.comprador_id?._id === userId || 
+                            t.comprador_id === userId || 
+                            t.comprador_itson_id === userItsonId;
+        const soyVendedor = t.vendedor_id?._id === userId || t.vendedor_id === userId;
+
         // Filtro por tipo (compra/venta)
-        if (filtroTransacciones.tipo === 'compras') {
-            if (t.comprador_id?._id !== userId && t.comprador_id !== userId) return false;
-        } else if (filtroTransacciones.tipo === 'ventas') {
-            if (t.vendedor_id?._id !== userId && t.vendedor_id !== userId) return false;
-        }
+        if (filtroTransacciones.tipo === 'compras' && !soyComprador) return false;
+        if (filtroTransacciones.tipo === 'ventas' && !soyVendedor) return false;
 
         // Filtro por estado
         if (filtroTransacciones.estado && t.estado !== filtroTransacciones.estado) return false;
 
         // Filtro por mes
         if (filtroTransacciones.mes) {
-            const fecha = new Date(t.createdAt);
+            const fecha = new Date(t.fecha_transaccion || t.createdAt);
             const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
             if (mes !== filtroTransacciones.mes) return false;
         }
@@ -144,7 +156,9 @@ function renderTransacciones() {
     });
 
     // Ordenar por fecha (más recientes primero)
-    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    filtered.sort((a, b) => new Date(b.fecha_transaccion || b.createdAt) - new Date(a.fecha_transaccion || a.createdAt));
+
+    console.log('Transacciones filtradas:', filtered.length);
 
     if (filtered.length === 0) {
         lista.innerHTML = '';
@@ -154,14 +168,22 @@ function renderTransacciones() {
 
     if (empty) empty.classList.add('hidden');
 
-    lista.innerHTML = filtered.map(t => crearTransaccionCard(t, userId)).join('');
+    lista.innerHTML = filtered.map(t => crearTransaccionCard(t, userId, userItsonId)).join('');
 }
 
-function crearTransaccionCard(trans, userId) {
-    const esCompra = trans.comprador_id?._id === userId || trans.comprador_id === userId;
+function crearTransaccionCard(trans, userId, userItsonId) {
+    // Determinar si soy el comprador
+    const esCompra = trans.comprador_id?._id === userId || 
+                     trans.comprador_id === userId || 
+                     trans.comprador_itson_id === userItsonId;
+    
     const publicacion = trans.publicacion_id || {};
     const contraparte = esCompra ? trans.vendedor_id : trans.comprador_id;
     const imagen = publicacion.detalles?.imagenes?.[0] || '/imgs/default-product.svg';
+    
+    // Para compradores no registrados mostrar el ITSON ID
+    const contraparteNombre = contraparte?.nombre || 
+                              (esCompra ? 'Vendedor' : `ID: ${trans.comprador_itson_id || 'Desconocido'}`);
 
     const estadoClasses = {
         'pendiente': 'badge-warning',
@@ -179,30 +201,22 @@ function crearTransaccionCard(trans, userId) {
         'cancelada': 'Cancelada'
     };
 
+    // Fecha formateada
+    const fecha = trans.fecha_transaccion || trans.createdAt;
+    const fechaFormateada = fecha ? formatDate(fecha) : 'Fecha desconocida';
+
     // Determinar acciones según estado
     let acciones = '';
-    if (trans.estado === 'pendiente' && !esCompra) {
-        acciones = `
-            <button onclick="aceptarTransaccion('${trans._id}')" class="btn btn-sm btn-primary">Aceptar</button>
-            <button onclick="cancelarTransaccion('${trans._id}')" class="btn btn-sm btn-outline">Rechazar</button>
-        `;
-    } else if (trans.estado === 'aceptada' || trans.estado === 'en_proceso') {
-        if (!esCompra) {
-            acciones = `
-                <button onclick="completarTransaccion('${trans._id}')" class="btn btn-sm btn-primary">Marcar completada</button>
-            `;
-        }
-    } else if (trans.estado === 'completada') {
-        // Verificar si ya calificó
-        const yaCalificó = esCompra ? trans.calificacion_comprador : trans.calificacion_vendedor;
-        if (!yaCalificó) {
+    if (trans.estado === 'completada' && esCompra) {
+        // Solo el comprador puede calificar
+        if (!trans.calificacion) {
             acciones = `
                 <button onclick="abrirModalCalificar('${trans._id}')" class="btn btn-sm btn-outline">
-                    Calificar
+                    ⭐ Calificar
                 </button>
             `;
         } else {
-            acciones = '<span class="badge badge-success">Calificado</span>';
+            acciones = `<span class="badge badge-success">Calificado ⭐${trans.calificacion.puntuacion}</span>`;
         }
     }
 
@@ -229,7 +243,7 @@ function crearTransaccionCard(trans, userId) {
                                 ${publicacion.titulo || 'Publicación'}
                             </h3>
                             <p style="font-size: 0.85rem; color: var(--gray-500); margin: 0;">
-                                ${formatDate(trans.createdAt)}
+                                ${fechaFormateada}
                             </p>
                         </div>
                         <div class="text-right">
@@ -248,7 +262,7 @@ function crearTransaccionCard(trans, userId) {
                                 ${esCompra ? 'Vendedor' : 'Comprador'}
                             </p>
                             <p style="font-weight: 500; margin: 0;">
-                                ${contraparte?.nombre || 'Usuario'}
+                                ${contraparteNombre}
                             </p>
                         </div>
                         <div class="flex gap-2">
@@ -415,19 +429,23 @@ async function enviarCalificacion() {
                 'Authorization': `Bearer ${window.AuthState.token}`
             },
             body: JSON.stringify({
-                calificacion: calificacionSeleccionada,
+                puntuacion: calificacionSeleccionada,
                 comentario
             })
         });
 
-        if (!res.ok) throw new Error('Error al enviar calificación');
+        const data = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(data.message || data.error || 'Error al enviar calificación');
+        }
 
         showToast('¡Gracias por tu calificación!', 'success');
         cerrarModalCalificar();
         cargarTransacciones();
     } catch (err) {
-        console.error(err);
-        showToast('Error al enviar la calificación', 'error');
+        console.error('Error calificando:', err);
+        showToast(err.message || 'Error al enviar la calificación', 'error');
     }
 }
 

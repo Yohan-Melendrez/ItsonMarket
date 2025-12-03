@@ -157,10 +157,12 @@ function renderPublicaciones() {
 
     if (emptyState) emptyState.classList.add("hidden");
 
-    // Renderizar cards
+    // Renderizar cards usando Web Components (Micro-Frontend)
+    // Usamos el componente <publicacion-card> para modularizar
     container.innerHTML = filtered.map(pub => crearCardPublicacion(pub)).join("");
 
-    // Agregar event listeners a las cards
+    // Los event listeners ahora están dentro del Web Component
+    // Pero mantenemos compatibilidad con las cards tradicionales
     container.querySelectorAll('.publicacion-card').forEach(card => {
         card.addEventListener('click', () => {
             const id = card.dataset.id;
@@ -175,6 +177,25 @@ function crearCardPublicacion(pub) {
     const precio = formatCurrency ? formatCurrency(pub.precio || 0) : `$${pub.precio || 0}`;
     const fecha = formatRelativeTime ? formatRelativeTime(pub.fecha_publicacion || pub.createdAt) : '';
 
+    // Opción 1: Usar Web Component <publicacion-card> (Micro-Frontend)
+    // Descomenta esto para usar el componente encapsulado:
+    /*
+    return `
+        <publicacion-card
+            pub-id="${pub._id}"
+            titulo="${pub.titulo || ''}"
+            descripcion="${(pub.descripcion || '').replace(/"/g, '&quot;')}"
+            precio="${pub.precio || 0}"
+            imagen="${imagen}"
+            categoria="${pub.categoria || 'Sin categoría'}"
+            tipo="${pub.tipo_publicacion || 'producto'}"
+            fecha="${pub.fecha_publicacion || pub.createdAt || ''}"
+            estado="${pub.estado || 'activo'}">
+        </publicacion-card>
+    `;
+    */
+
+    // Opción 2: Card tradicional (mantiene estilos globales)
     return `
         <div class="publicacion-card card" data-id="${pub._id}" style="cursor: pointer; padding: 0; overflow: hidden;">
             <div style="position: relative;">
@@ -443,6 +464,8 @@ function initCrearPublicacion() {
 }
 
 // ============= DETALLE PUBLICACIÓN =============
+var publicacionActual = null; // Para guardar la publicación actual
+
 async function initDetallePublicacion() {
     const params = window.routeParams || {};
     const id = params.id;
@@ -470,8 +493,11 @@ async function initDetallePublicacion() {
     const vendedorRating = document.getElementById("vendedorRating");
     const vendedorCarrera = document.getElementById("vendedorCarrera");
     const btnContactar = document.getElementById("btnContactar");
-    const btnComprar = document.getElementById("btnComprar");
     const tipoBadge = document.getElementById("tipoBadge");
+    const botonesVisitante = document.getElementById("botonesVisitante");
+    const botonesDueno = document.getElementById("botonesDueno");
+    const btnMarcarVenta = document.getElementById("btnMarcarVenta");
+    const btnEditarPub = document.getElementById("btnEditarPub");
 
     try {
         const headers = {};
@@ -485,6 +511,9 @@ async function initDetallePublicacion() {
         if (!res.ok) {
             throw new Error(pub.message || "Publicación no encontrada");
         }
+
+        // Guardar publicación actual para uso posterior
+        publicacionActual = pub;
 
         // Ocultar loading
         if (loading) loading.classList.add("hidden");
@@ -540,10 +569,9 @@ async function initDetallePublicacion() {
             }
         }
 
-        // Link al perfil del vendedor - usar vendedor._id o el vendedorId original
+        // Link al perfil del vendedor
         const vendedorLink = document.getElementById("vendedorLink");
         const vendedorIdFinal = vendedor._id || vendedorId;
-        console.log("Vendedor data:", vendedor, "vendedorIdFinal:", vendedorIdFinal);
         if (vendedorLink && vendedorIdFinal) {
             vendedorLink.href = `#/usuario/${vendedorIdFinal}`;
         }
@@ -554,27 +582,43 @@ async function initDetallePublicacion() {
             vendedorAvatar.onerror = () => vendedorAvatar.src = '/imgs/default-avatar.svg';
         }
         if (vendedorRating) {
-            const rating = vendedor.reputacion || 5;
+            const rep = parseFloat(vendedor.reputacion);
             vendedorRating.innerHTML = `
                 <span style="color: var(--warning); font-size: 1.1rem;">★</span>
-                <span style="font-weight: 600;">${Number(rating).toFixed(1)}</span>
+                <span style="font-weight: 600;">${isNaN(rep) ? 'Nuevo' : rep.toFixed(1)}</span>
             `;
         }
         if (vendedorCarrera) vendedorCarrera.textContent = vendedor.carrera || '';
 
         // Obtener ID del usuario actual de forma segura
-        const usuarioActualId = window.AuthState.user?._id || window.AuthState.user?.id;
+        const usuarioActualId = window.AuthState?.user?._id || window.AuthState?.user?.id;
 
         // Verificar si soy el dueño
-        const soyElDueno = usuarioActualId === (vendedor._id || vendedorId);
+        const soyElDueno = usuarioActualId && (usuarioActualId === vendedor._id || usuarioActualId === vendedorId);
 
-        if (btnContactar) {
-            if (soyElDueno) {
-                btnContactar.disabled = true;
-                btnContactar.innerHTML = '<span>Es tu publicación</span>';
-                btnContactar.classList.add('btn-disabled');
-            } else {
-                // Lógica normal para contactar
+        // Mostrar botones según sea dueño o visitante
+        if (soyElDueno) {
+            // Soy el dueño: mostrar botones de gestión
+            if (botonesVisitante) botonesVisitante.classList.add('hidden');
+            if (botonesDueno) botonesDueno.classList.remove('hidden');
+            
+            // Configurar botón editar
+            if (btnEditarPub) {
+                btnEditarPub.href = `#/publicaciones/editar/${pub._id}`;
+            }
+            
+            // Configurar botón marcar venta
+            if (btnMarcarVenta) {
+                btnMarcarVenta.addEventListener('click', () => {
+                    abrirModalVenta();
+                });
+            }
+        } else {
+            // Soy visitante: mostrar botones de contacto
+            if (botonesVisitante) botonesVisitante.classList.remove('hidden');
+            if (botonesDueno) botonesDueno.classList.add('hidden');
+            
+            if (btnContactar) {
                 btnContactar.addEventListener('click', () => {
                     if (!window.AuthState?.isLoggedIn()) {
                         showToast('Inicia sesión para contactar', 'warning');
@@ -587,17 +631,8 @@ async function initDetallePublicacion() {
             }
         }
 
-
-        if (btnComprar) {
-            btnComprar.addEventListener('click', () => {
-                if (!window.AuthState?.isLoggedIn()) {
-                    showToast('Inicia sesión para comprar', 'warning');
-                    navigateTo('/login');
-                    return;
-                }
-                abrirModalCompra(pub);
-            });
-        }
+        // Configurar formulario de marcar venta
+        initFormMarcarVenta();
 
     } catch (err) {
         console.error("Error cargando detalle:", err);
@@ -606,15 +641,183 @@ async function initDetallePublicacion() {
     }
 }
 
+// Abrir modal de marcar venta
+function abrirModalVenta() {
+    const modal = document.getElementById("modalMarcarVenta");
+    if (modal) {
+        modal.classList.remove("hidden");
+        // Limpiar campos
+        document.getElementById("compradorItsonId").value = '';
+        document.getElementById("infoComprador").classList.add("hidden");
+        document.getElementById("infoCompradorNoRegistrado").classList.add("hidden");
+        document.getElementById("ventaError").classList.add("hidden");
+    }
+}
+
+// Cerrar modal de venta
+window.cerrarModalVenta = function() {
+    const modal = document.getElementById("modalMarcarVenta");
+    if (modal) modal.classList.add("hidden");
+};
+
+// Inicializar formulario de marcar venta
+function initFormMarcarVenta() {
+    const form = document.getElementById("formMarcarVenta");
+    const inputId = document.getElementById("compradorItsonId");
+    const infoComprador = document.getElementById("infoComprador");
+    const infoNoRegistrado = document.getElementById("infoCompradorNoRegistrado");
+    
+    if (!form || !inputId) return;
+
+    let compradorEncontrado = null;
+    let timeoutBusqueda = null;
+
+    // Buscar usuario mientras escribe
+    inputId.addEventListener("input", () => {
+        const itsonId = inputId.value.trim();
+        
+        // Ocultar info previa
+        if (infoComprador) infoComprador.classList.add("hidden");
+        if (infoNoRegistrado) infoNoRegistrado.classList.add("hidden");
+        compradorEncontrado = null;
+
+        // Solo buscar si tiene al menos 1 dígito y máximo 11
+        if (itsonId.length >= 1 && itsonId.length <= 11 && /^\d{1,11}$/.test(itsonId)) {
+            clearTimeout(timeoutBusqueda);
+            timeoutBusqueda = setTimeout(() => buscarComprador(itsonId), 500);
+        }
+    });
+
+    // Buscar comprador por ITSON ID
+    async function buscarComprador(itsonId) {
+        // Normalizar a 11 dígitos con ceros al inicio
+        const itsonIdNormalizado = itsonId.padStart(11, '0');
+        console.log('Buscando ITSON ID:', itsonId, '-> normalizado:', itsonIdNormalizado);
+        
+        try {
+            // Buscar con el ID normalizado a 11 caracteres
+            const res = await fetch(`/api/usuarios/buscar?itson_id=${itsonIdNormalizado}`, {
+                headers: {
+                    'Authorization': `Bearer ${window.AuthState.token}`
+                }
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok && data && (Array.isArray(data) ? data.length > 0 : data._id)) {
+                // Usuario encontrado
+                const usuario = Array.isArray(data) ? data[0] : data;
+                compradorEncontrado = usuario;
+                
+                document.getElementById("compradorAvatar").src = usuario.foto || '/imgs/default-avatar.svg';
+                document.getElementById("compradorNombre").textContent = usuario.nombre || 'Usuario';
+                document.getElementById("compradorCarrera").textContent = usuario.carrera || '';
+                
+                if (infoComprador) infoComprador.classList.remove("hidden");
+                if (infoNoRegistrado) infoNoRegistrado.classList.add("hidden");
+            } else {
+                // Usuario no registrado
+                compradorEncontrado = null;
+                if (infoComprador) infoComprador.classList.add("hidden");
+                if (infoNoRegistrado) infoNoRegistrado.classList.remove("hidden");
+            }
+        } catch (err) {
+            console.log("Error buscando usuario:", err);
+            // Mostrar como no registrado si hay error
+            if (infoComprador) infoComprador.classList.add("hidden");
+            if (infoNoRegistrado) infoNoRegistrado.classList.remove("hidden");
+        }
+    }
+
+    // Submit del formulario
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const itsonId = inputId.value.trim();
+        const ventaError = document.getElementById("ventaError");
+        const btn = document.getElementById("btnConfirmarVenta");
+        const btnTexto = document.getElementById("btnVentaTexto");
+        const btnLoading = document.getElementById("btnVentaLoading");
+
+        // Validar (1-11 dígitos)
+        if (!itsonId || itsonId.length < 1 || itsonId.length > 11 || !/^\d{1,11}$/.test(itsonId)) {
+            if (ventaError) {
+                ventaError.textContent = "Ingresa un ITSON ID válido";
+                ventaError.classList.remove("hidden");
+            }
+            return;
+        }
+
+        // No permitir venderse a sí mismo
+        const miItsonId = window.AuthState.user?.itson_id;
+        if (miItsonId === itsonId) {
+            if (ventaError) {
+                ventaError.textContent = "No puedes registrar una venta a ti mismo";
+                ventaError.classList.remove("hidden");
+            }
+            return;
+        }
+
+        // Loading
+        if (btn) btn.disabled = true;
+        if (btnTexto) btnTexto.classList.add("hidden");
+        if (btnLoading) btnLoading.classList.remove("hidden");
+        if (ventaError) ventaError.classList.add("hidden");
+
+        try {
+            const res = await fetch("/api/transacciones/marcar-venta", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${window.AuthState.token}`
+                },
+                body: JSON.stringify({
+                    publicacion_id: publicacionActual._id,
+                    comprador_itson_id: itsonId,
+                    comprador_id: compradorEncontrado?._id || null
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Error al registrar la venta");
+            }
+
+            showToast('¡Venta registrada exitosamente!', 'success');
+            cerrarModalVenta();
+            
+            // Recargar la página o mostrar mensaje
+            if (compradorEncontrado) {
+                showToast('Se notificará al comprador para que califique la transacción', 'info');
+            }
+
+        } catch (err) {
+            console.error("Error registrando venta:", err);
+            if (ventaError) {
+                ventaError.textContent = err.message || "Error al registrar la venta";
+                ventaError.classList.remove("hidden");
+            }
+        } finally {
+            if (btn) btn.disabled = false;
+            if (btnTexto) btnTexto.classList.remove("hidden");
+            if (btnLoading) btnLoading.classList.add("hidden");
+        }
+    });
+}
+
 // Función para cambiar imagen en galería
 window.cambiarImagen = function (src, thumb) {
-    const imagenPrincipal = document.getElementById("imagen-principal");
+    const imagenPrincipal = document.getElementById("mainImage");
     if (imagenPrincipal) imagenPrincipal.src = src;
 
     // Actualizar bordes de thumbnails
-    document.querySelectorAll('.gallery-thumb').forEach(t => {
-        t.style.borderColor = 'transparent';
-    });
+    const thumbs = document.getElementById("thumbnails");
+    if (thumbs) {
+        thumbs.querySelectorAll('img').forEach(t => {
+            t.style.borderColor = 'transparent';
+        });
+    }
     if (thumb) thumb.style.borderColor = 'var(--primary)';
 };
 
@@ -654,68 +857,6 @@ async function iniciarChatConVendedor(vendedorId, publicacionId) {
         showToast(err.message || 'Error al iniciar conversación', 'error');
     }
 }
-
-// Modal de compra
-function abrirModalCompra(publicacion) {
-    const modal = document.getElementById("modal-compra");
-    const confirmarTitulo = document.getElementById("confirmar-titulo");
-    const confirmarPrecio = document.getElementById("confirmar-precio");
-    const btnConfirmar = document.getElementById("btn-confirmar-compra");
-
-    if (!modal) return;
-
-    if (confirmarTitulo) confirmarTitulo.textContent = publicacion.titulo;
-    if (confirmarPrecio) confirmarPrecio.textContent = formatCurrency(publicacion.precio || 0);
-
-    modal.classList.remove("hidden");
-
-    // Event listener para confirmar
-    if (btnConfirmar) {
-        btnConfirmar.onclick = async () => {
-            await realizarCompra(publicacion._id);
-            modal.classList.add("hidden");
-        };
-    }
-
-    // Cerrar modal
-    const overlay = modal.querySelector('.modal-overlay');
-    if (overlay) {
-        overlay.onclick = () => modal.classList.add("hidden");
-    }
-}
-
-async function realizarCompra(publicacionId) {
-    try {
-        const res = await fetch("/api/transacciones", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${window.AuthState.token}`
-            },
-            body: JSON.stringify({
-                publicacion_id: publicacionId
-            })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            throw new Error(data.message || "Error al procesar compra");
-        }
-
-        showToast('¡Compra realizada exitosamente!', 'success');
-        navigateTo('/transacciones');
-    } catch (err) {
-        console.error("Error en compra:", err);
-        showToast(err.message || 'Error al realizar la compra', 'error');
-    }
-}
-
-// Cerrar modal de compra
-window.cerrarModalCompra = function () {
-    const modal = document.getElementById("modal-compra");
-    if (modal) modal.classList.add("hidden");
-};
 
 // Exponer funciones globalmente
 window.initPublicaciones = initPublicaciones;

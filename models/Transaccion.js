@@ -7,17 +7,19 @@ const CalificacionSchema = new mongoose.Schema({
 });
 
 const Transaccion = new mongoose.Schema({
-  comprador_id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
+  // comprador_id es opcional: si el comprador no está registrado, usamos comprador_itson_id
+  comprador_id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: false },
+  // ITSON ID del comprador (siempre se guarda, para vincular cuando se registre)
+  comprador_itson_id: { type: String, required: true },
   vendedor_id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
   publicacion_id: { type: mongoose.Schema.Types.ObjectId, ref: "Publicacion", required: true },
   tipo_publicacion: { type: String, enum: ["producto", "servicio"], required: true },
   fecha_transaccion: { type: Date, default: Date.now },
-  calificaciones: {
-    comprador_a_vendedor: { type: CalificacionSchema },
-    vendedor_a_comprador: { type: CalificacionSchema }
-  },
-  estado: { type: String, enum: ["pendiente", "completada", "cancelada"], default: "pendiente" },
-  monto: { type: Number, required: true }
+  calificacion: { type: CalificacionSchema }, // Calificación del comprador al vendedor
+  estado: { type: String, enum: ["pendiente", "completada", "cancelada"], default: "completada" },
+  monto: { type: Number, required: true },
+  // Para saber si el comprador ya fue notificado para calificar
+  notificacion_enviada: { type: Boolean, default: false }
 });
 
 const TransaccionModel = mongoose.model("Transaccion", Transaccion);

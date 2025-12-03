@@ -67,9 +67,15 @@ class PublicacionRepository {
     fechaHasta,
     sort = '-fecha_publicacion',
     page = 1,
-    limit = 12
+    limit = 12,
+    includeHidden = false  // Si true, incluye publicaciones no visibles (para el vendedor)
   } = {}) {
-    const filter = { visible: true }; 
+    const filter = {};
+    
+    // Solo filtrar por visible si no es el propietario consultando sus publicaciones
+    if (!includeHidden) {
+      filter.visible = true;
+    }
 
     if (categoria) filter.categoria = categoria;
     if (vendedor_id) filter.vendedor_id = vendedor_id;

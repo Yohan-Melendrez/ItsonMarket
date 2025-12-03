@@ -77,7 +77,10 @@ async function initPerfilUsuario(userId) {
         if (perfilNombre) perfilNombre.textContent = usuario.nombre || 'Usuario';
         if (perfilCorreo) perfilCorreo.textContent = usuario.correo_institucional || '';
         if (perfilCarreraBadge) perfilCarreraBadge.textContent = usuario.carrera || 'Sin carrera';
-        if (statReputacion) statReputacion.textContent = Number(usuario.reputacion || 5).toFixed(1);
+        if (statReputacion) {
+            const rep = parseFloat(usuario.reputacion);
+            statReputacion.textContent = isNaN(rep) ? 'Sin reseñas' : rep.toFixed(1);
+        }
         if (infoItsonId) infoItsonId.textContent = usuario.itson_id || '-';
         if (infoTelefono) infoTelefono.textContent = usuario.telefono || '-';
         if (infoCarrera) infoCarrera.textContent = getCarreraNombre(usuario.carrera) || '-';
@@ -120,12 +123,12 @@ async function cargarPublicacionesUsuario(userId) {
     const container = document.getElementById('publicacionesList');
     if (!container) return;
 
-    container.innerHTML = '<div class="text-center p-8"><div class="loader"></div></div>';
+    container.innerHTML = '<div class="text-center p-8"><div class="spinner"></div></div>';
 
     try {
-        const res = await fetch(`/api/publicaciones?vendedor_id=${userId}`);
+        const res = await fetch(`/api/publicaciones/vendedor/${userId}`);
         const data = await res.json();
-        const publicaciones = data.items || data.publicaciones || data || [];
+        const publicaciones = data.items || data.publicaciones || (Array.isArray(data) ? data : []);
 
         if (publicaciones.length === 0) {
             container.innerHTML = `
@@ -227,7 +230,10 @@ async function initPerfil() {
         if (perfilNombre) perfilNombre.textContent = usuario.nombre || 'Usuario';
         if (perfilCorreo) perfilCorreo.textContent = usuario.correo_institucional || '';
         if (perfilCarreraBadge) perfilCarreraBadge.textContent = usuario.carrera || 'Sin carrera';
-        if (statReputacion) statReputacion.textContent = Number(usuario.reputacion || 5).toFixed(1);
+        if (statReputacion) {
+            const rep = parseFloat(usuario.reputacion);
+            statReputacion.textContent = isNaN(rep) ? 'Sin reseñas' : rep.toFixed(1);
+        }
         if (infoItsonId) infoItsonId.textContent = usuario.itson_id || '-';
         if (infoTelefono) infoTelefono.textContent = usuario.telefono || '-';
         if (infoCarrera) infoCarrera.textContent = getCarreraNombre(usuario.carrera) || '-';
@@ -247,26 +253,25 @@ async function cargarEstadisticas(userId) {
     const statTransacciones = document.getElementById("statTransacciones");
 
     try {
-        // Cargar publicaciones del usuario
-        const resPub = await fetch(`/api/publicaciones?vendedor_id=${userId}`, {
-            headers: {
-                'Authorization': `Bearer ${window.AuthState.token}`
-            }
-        });
-        const publicaciones = await resPub.json();
-        if (statPublicaciones) {
-            statPublicaciones.textContent = Array.isArray(publicaciones) ? publicaciones.length : 0;
+        const headers = {};
+        if (window.AuthState?.token) {
+            headers['Authorization'] = `Bearer ${window.AuthState.token}`;
         }
 
-        // Cargar transacciones
-        const resTrans = await fetch(`/api/transacciones/usuario/${userId}`, {
-            headers: {
-                'Authorization': `Bearer ${window.AuthState.token}`
-            }
-        });
-        const transacciones = await resTrans.json();
+        // Cargar publicaciones del usuario
+        const resPub = await fetch(`/api/publicaciones/vendedor/${userId}`, { headers });
+        const publicaciones = await resPub.json();
+        if (statPublicaciones) {
+            const count = publicaciones.total || (publicaciones.items?.length) || (Array.isArray(publicaciones) ? publicaciones.length : 0);
+            statPublicaciones.textContent = count;
+        }
+
+        // Cargar transacciones - usar endpoint que filtra por vendedor
+        const resTrans = await fetch(`/api/transacciones?vendedor_id=${userId}`, { headers });
+        const transData = await resTrans.json();
         if (statTransacciones) {
-            statTransacciones.textContent = Array.isArray(transacciones) ? transacciones.length : 0;
+            const transacciones = transData.data || transData.transacciones || (Array.isArray(transData) ? transData : []);
+            statTransacciones.textContent = transacciones.length;
         }
     } catch (err) {
         console.error("Error cargando estadísticas:", err);
@@ -283,14 +288,16 @@ async function cargarMisPublicaciones() {
     container.innerHTML = '<div class="spinner" style="grid-column: 1/-1; margin: 2rem auto;"></div>';
 
     try {
-        const res = await fetch(`/api/publicaciones?vendedor_id=${userId}`, {
+        // Usar endpoint específico para vendedor que incluye todas las publicaciones (visibles o no)
+        const res = await fetch(`/api/publicaciones/vendedor/${userId}`, {
             headers: {
                 'Authorization': `Bearer ${window.AuthState.token}`
             }
         });
 
         const data = await res.json();
-        const publicaciones = Array.isArray(data) ? data : [];
+        // La respuesta tiene formato { items: [], total, page, ... }
+        const publicaciones = data.items || data.publicaciones || (Array.isArray(data) ? data : []);
 
         if (publicaciones.length === 0) {
             container.innerHTML = '';

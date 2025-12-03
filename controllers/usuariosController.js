@@ -38,12 +38,30 @@ exports.obtenerUsuarios = async (req, res, next) => {
 
 /**
  * @route GET /api/usuarios/buscar
- * @desc Buscar usuarios por nombre
+ * @desc Buscar usuarios por nombre o ITSON ID
  * @access Private
  */
 exports.buscarUsuarios = async (req, res, next) => {
   try {
-    const { q } = req.query;
+    const { q, itson_id } = req.query;
+    
+    // Si se busca por itson_id específico
+    if (itson_id) {
+      const usuario = await repo.findByItsonId(itson_id);
+      if (usuario) {
+        return res.status(200).json({
+          _id: usuario._id,
+          nombre: usuario.nombre,
+          carrera: usuario.carrera,
+          foto: usuario.foto,
+          itson_id: usuario.itson_id
+        });
+      }
+      // Si no existe, devolver null en lugar de 404
+      return res.status(200).json(null);
+    }
+
+    // Búsqueda por nombre
     if (!q || q.length < 2) {
       return res.status(200).json([]);
     }
