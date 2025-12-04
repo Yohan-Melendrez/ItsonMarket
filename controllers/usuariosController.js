@@ -4,21 +4,23 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 /**
- * Helper para buscar usuario por _id o itson_id
+ * @function buscarUsuario
+ * @desc Helper para buscar usuario por _id o itson_id
+ * @param {string} id - ID de MongoDB o ITSON ID del usuario
+ * @returns {Promise<Object|null>} Objeto usuario encontrado o null
+ * @access Private
  */
 async function buscarUsuario(id) {
-  // Si parece un ObjectId de MongoDB, buscar por _id
   if (mongoose.Types.ObjectId.isValid(id)) {
     const usuario = await repo.findById(id);
     if (usuario) return usuario;
   }
-  // Si no se encuentra, buscar por itson_id
   return await repo.findByItsonId(id);
 }
 
 /**
  * @route GET /api/usuarios
- * @desc Obtener todos los usuarios (protegido)
+ * @desc Obtener todos los usuarios registrados en el sistema
  * @access Private
  */
 exports.obtenerUsuarios = async (req, res, next) => {
@@ -45,7 +47,6 @@ exports.buscarUsuarios = async (req, res, next) => {
   try {
     const { q, itson_id } = req.query;
     
-    // Si se busca por itson_id específico
     if (itson_id) {
       const usuario = await repo.findByItsonId(itson_id);
       if (usuario) {
@@ -57,11 +58,9 @@ exports.buscarUsuarios = async (req, res, next) => {
           itson_id: usuario.itson_id
         });
       }
-      // Si no existe, devolver null en lugar de 404
       return res.status(200).json(null);
     }
 
-    // Búsqueda por nombre
     if (!q || q.length < 2) {
       return res.status(200).json([]);
     }
@@ -75,7 +74,7 @@ exports.buscarUsuarios = async (req, res, next) => {
 
 /**
  * @route POST /api/usuarios
- * @desc Crear un nuevo usuario (protegido)
+ * @desc Crear un nuevo usuario en el sistema
  * @access Private
  */
 exports.crearUsuario = async (req, res, next) => {
@@ -112,7 +111,7 @@ exports.crearUsuario = async (req, res, next) => {
 
 /**
  * @route GET /api/usuarios/:id
- * @desc Obtener un usuario por ID o ITSON ID (protegido)
+ * @desc Obtener información detallada de un usuario por ID o ITSON ID
  * @access Private
  */
 exports.obtenerUsuarioPorId = async (req, res, next) => {
@@ -137,7 +136,7 @@ exports.obtenerUsuarioPorId = async (req, res, next) => {
 
 /**
  * @route PUT /api/usuarios/:id
- * @desc Actualizar datos de un usuario por ID o ITSON ID (protegido)
+ * @desc Actualizar información de un usuario - permite cambiar datos personales y contraseña
  * @access Private
  */
 exports.actualizarUsuario = async (req, res, next) => {
@@ -153,7 +152,6 @@ exports.actualizarUsuario = async (req, res, next) => {
       });
     }
 
-    // Preparar datos de actualización
     const updateData = {};
     
     if (req.body.nombre) updateData.nombre = req.body.nombre;
@@ -161,12 +159,10 @@ exports.actualizarUsuario = async (req, res, next) => {
     if (req.body.carrera) updateData.carrera = req.body.carrera;
     if (req.body.foto) updateData.foto = req.body.foto;
     
-    // Si hay imagen como base64 en el body (desde FormData parseado)
     if (req.body.avatar && req.body.avatar.startsWith && req.body.avatar.startsWith('data:image')) {
       updateData.foto = req.body.avatar;
     }
     
-    // Si se quiere cambiar contraseña
     if (req.body.contrasena_nueva) {
       const passOk = await bcrypt.compare(req.body.contrasena_actual, usuarioExistente.contrasena);
       if (!passOk) {
@@ -197,7 +193,7 @@ exports.actualizarUsuario = async (req, res, next) => {
 
 /**
  * @route DELETE /api/usuarios/:id
- * @desc Eliminar un usuario por ID o ITSON ID (protegido)
+ * @desc Eliminar un usuario del sistema
  * @access Private
  */
 exports.eliminarUsuario = async (req, res, next) => {

@@ -7,8 +7,6 @@ const authMiddleware = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
 const v = require('../validators/publicacionValidator');
 
-// ========== RUTAS PÚBLICAS (sin autenticación) ==========
-
 /**
  * @route GET /api/publicaciones
  * @desc Listar publicaciones con filtros + paginación

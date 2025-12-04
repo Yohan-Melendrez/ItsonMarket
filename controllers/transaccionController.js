@@ -3,7 +3,9 @@ const TransaccionService = require('../services/TransaccionService');
 const service = new TransaccionService();
 
 /**
- * Marcar una venta - el vendedor registra la transacción
+ * @route POST /api/transacciones/marcar-venta
+ * @desc Marcar una venta - el vendedor registra la transacción
+ * @access Private
  */
 exports.marcarVenta = async (req, res, next) => {
   try {
@@ -24,7 +26,9 @@ exports.marcarVenta = async (req, res, next) => {
 };
 
 /**
- * Calificar una transacción (comprador califica al vendedor)
+ * @route PATCH /api/transacciones/:id/calificar
+ * @desc Calificar una transacción - comprador califica al vendedor
+ * @access Private
  */
 exports.calificar = async (req, res, next) => {
   try {
@@ -45,7 +49,9 @@ exports.calificar = async (req, res, next) => {
 };
 
 /**
- * Obtener transacciones del usuario actual
+ * @route GET /api/transacciones/mis-transacciones
+ * @desc Obtener todas las transacciones del usuario actual
+ * @access Private
  */
 exports.misTransacciones = async (req, res, next) => {
   try {
@@ -63,7 +69,9 @@ exports.misTransacciones = async (req, res, next) => {
 };
 
 /**
- * Obtener transacciones pendientes de calificar
+ * @route GET /api/transacciones/pendientes-calificar
+ * @desc Obtener transacciones pendientes de calificar del usuario
+ * @access Private
  */
 exports.pendientesCalificar = async (req, res, next) => {
   try {
@@ -77,6 +85,11 @@ exports.pendientesCalificar = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+/**
+ * @route POST /api/transacciones
+ * @desc Crear una nueva transacción
+ * @access Private
+ */
 exports.crear = async (req, res, next) => {
   try {
     const trx = await service.crear(req.body);
@@ -84,6 +97,11 @@ exports.crear = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+/**
+ * @route GET /api/transacciones
+ * @desc Obtener lista de transacciones con filtros
+ * @access Private
+ */
 exports.listar = async (req, res, next) => {
   try {
     const items = await service.listar({
@@ -99,6 +117,11 @@ exports.listar = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+/**
+ * @route GET /api/transacciones/:id
+ * @desc Obtener una transacción por ID
+ * @access Private
+ */
 exports.obtenerPorId = async (req, res, next) => {
   try {
     const item = await service.obtenerPorId(req.params.id);
@@ -107,6 +130,11 @@ exports.obtenerPorId = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+/**
+ * @route PUT /api/transacciones/:id
+ * @desc Actualizar una transacción existente
+ * @access Private
+ */
 exports.actualizar = async (req, res, next) => {
   try {
     const item = await service.actualizar(req.params.id, req.body);
@@ -115,6 +143,11 @@ exports.actualizar = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+/**
+ * @route DELETE /api/transacciones/:id
+ * @desc Eliminar una transacción
+ * @access Private
+ */
 exports.eliminar = async (req, res, next) => {
   try {
     const item = await service.eliminar(req.params.id);

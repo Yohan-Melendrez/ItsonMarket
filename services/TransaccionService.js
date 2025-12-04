@@ -19,7 +19,6 @@ class TransaccionService {
 
   #validatePayload(data, { isUpdate = false } = {}) {
     if (!isUpdate) {
-      // Para el nuevo flujo, solo requerimos comprador_itson_id
       if (!data.comprador_itson_id) {
         throw new Error('comprador_itson_id es obligatorio');
       }
@@ -40,7 +39,6 @@ class TransaccionService {
       throw new Error(`estado inválido (${ESTADOS.join(', ')})`);
     }
 
-    // Validar calificación si existe
     if (data.calificacion) {
       if (typeof data.calificacion.puntuacion !== 'number' || 
           data.calificacion.puntuacion < 1 || 
@@ -51,7 +49,15 @@ class TransaccionService {
   }
 
   /**
-   * Marcar una venta - el vendedor registra que vendió a un comprador por su ITSON ID
+   * @function marcarVenta
+   * @desc Registrar una venta - el vendedor marca una publicación como vendida
+   * @param {Object} params - Parámetros de la venta
+   * @param {String} params.publicacion_id - ID de la publicación
+   * @param {String} params.comprador_itson_id - ITSON ID del comprador
+   * @param {String} params.vendedor_id - ID del vendedor
+   * @returns {Promise<Object>} Objeto con transacción, datos del comprador y estado de registro
+   * @throws {Error} Si los datos son inválidos o no hay permisos
+   * @access Private
    */
   async marcarVenta({ publicacion_id, comprador_itson_id, vendedor_id }) {
     console.log('=== MARCAR VENTA ===');
@@ -59,7 +65,6 @@ class TransaccionService {
     console.log('comprador_itson_id:', comprador_itson_id);
     console.log('vendedor_id:', vendedor_id);
 
-    // Validar publicación
     if (!this.#isObjectId(publicacion_id)) {
       throw new Error('ID de publicación inválido');
     }
@@ -71,31 +76,25 @@ class TransaccionService {
       throw new Error('Publicación no encontrada');
     }
 
-    // Verificar que el vendedor sea el dueño de la publicación
     console.log('Comparando vendedor_id:', String(publicacion.vendedor_id), 'con', String(vendedor_id));
     if (String(publicacion.vendedor_id) !== String(vendedor_id)) {
       throw new Error('No tienes permiso para marcar ventas en esta publicación');
     }
 
-    // Validar ITSON ID (aceptar 1-11 dígitos)
     if (!comprador_itson_id || !/^\d{1,11}$/.test(comprador_itson_id)) {
       throw new Error('ITSON ID del comprador inválido');
     }
 
-    // Normalizar ITSON ID a 11 dígitos con ceros al inicio
     const itsonIdNormalizado = comprador_itson_id.padStart(11, '0');
     console.log('ITSON ID normalizado:', itsonIdNormalizado);
 
-    // Buscar si el comprador existe en el sistema
     const comprador = await this.usuarioRepo.findByItsonId(itsonIdNormalizado);
     console.log('Comprador encontrado:', comprador ? comprador.nombre : 'NO (pero continuamos)');
     
-    // No permitir venderse a sí mismo
     if (comprador && String(comprador._id) === String(vendedor_id)) {
       throw new Error('No puedes registrar una venta a ti mismo');
     }
 
-    // Crear la transacción (guardar ITSON ID normalizado)
     const transaccionData = {
       comprador_id: comprador ? comprador._id : null,
       comprador_itson_id: itsonIdNormalizado,
@@ -124,8 +123,13 @@ class TransaccionService {
     };
   }
 
+
   /**
-   * Vincular transacciones pendientes cuando un usuario se registra
+   * @function vincularTransaccionesPendientes
+   * @desc Vincular transacciones pendientes a un usuario registrado
+   * @param {Object} usuario - Objeto del usuario
+   * @returns {Promise<Number>} Cantidad de transacciones vinculadas
+   * @access Private
    */
   async vincularTransaccionesPendientes(usuario) {
     const transaccionesPendientes = await this.repo.findByCompradorItsonId(usuario.itson_id);
@@ -140,7 +144,16 @@ class TransaccionService {
   }
 
   /**
-   * Calificar una transacción (el comprador califica al vendedor)
+   * @function calificar
+   * @desc Calificar una transacción - el comprador califica al vendedor
+   * @param {String} transaccionId - ID de la transacción
+   * @param {String} compradorId - ID del comprador que califica
+   * @param {Object} params - Datos de la calificación
+   * @param {Number} params.puntuacion - Puntuación de 1 a 5
+   * @param {String} params.comentario - Comentario opcional
+   * @returns {Promise<Object>} Transacción actualizada con calificación
+   * @throws {Error} Si los datos son inválidos o no hay permisos
+   * @access Private
    */
   async calificar(transaccionId, compradorId, { puntuacion, comentario }) {
     if (!this.#isObjectId(transaccionId)) {
@@ -152,13 +165,11 @@ class TransaccionService {
       throw new Error('Transacción no encontrada');
     }
 
-    // Obtener el usuario que está calificando para verificar su ITSON ID
     const usuarioCalificador = await this.usuarioRepo.findById(compradorId);
     if (!usuarioCalificador) {
       throw new Error('Usuario no encontrado');
     }
 
-    // Verificar que el que califica es el comprador (por ID o por ITSON ID)
     const esCompradorPorId = transaccion.comprador_id && String(transaccion.comprador_id._id || transaccion.comprador_id) === String(compradorId);
     const esCompradorPorItsonId = transaccion.comprador_itson_id === usuarioCalificador.itson_id;
     
@@ -166,17 +177,14 @@ class TransaccionService {
       throw new Error('Solo el comprador puede calificar esta transacción');
     }
 
-    // Verificar que no haya sido calificada ya
     if (transaccion.calificacion) {
       throw new Error('Esta transacción ya fue calificada');
     }
 
-    // Si el comprador_id estaba null, actualizarlo ahora
     if (!transaccion.comprador_id && esCompradorPorItsonId) {
       await this.repo.update(transaccionId, { comprador_id: compradorId });
     }
 
-    // Actualizar la transacción con la calificación
     const actualizada = await this.repo.update(transaccionId, {
       calificacion: {
         puntuacion,
@@ -185,14 +193,17 @@ class TransaccionService {
       }
     });
 
-    // Actualizar la reputación del vendedor
     await this.actualizarReputacionVendedor(transaccion.vendedor_id);
 
     return actualizada;
   }
 
   /**
-   * Recalcular la reputación de un vendedor basada en sus calificaciones
+   * @function actualizarReputacionVendedor
+   * @desc Actualizar la reputación promedio de un vendedor basado en sus calificaciones
+   * @param {String} vendedorId - ID del vendedor
+   * @returns {Promise<void>}
+   * @access Private
    */
   async actualizarReputacionVendedor(vendedorId) {
     const transacciones = await this.repo.findAll({ vendedor_id: vendedorId });
@@ -209,13 +220,26 @@ class TransaccionService {
   }
 
   /**
-   * Obtener transacciones de un usuario (como comprador o vendedor)
+   * @function obtenerTransaccionesUsuario
+   * @desc Obtener todas las transacciones de un usuario como comprador o vendedor
+   * @param {String} usuarioId - ID del usuario
+   * @param {String} itsonId - ITSON ID del usuario
+   * @returns {Promise<Array>} Array de transacciones del usuario
+   * @access Private
    */
   async obtenerTransaccionesUsuario(usuarioId, itsonId) {
     const transacciones = await this.repo.findByUsuario(usuarioId, itsonId);
     return transacciones;
   }
 
+  /**
+   * @function crear
+   * @desc Crear una nueva transacción con validación de datos
+   * @param {Object} data - Datos de la transacción
+   * @returns {Promise<Object>} Transacción creada
+   * @throws {Error} Si los datos son inválidos o comprador y vendedor son la misma persona
+   * @access Private
+   */
   async crear(data) {
     this.#validatePayload(data);
     if (data.comprador_id && String(data.comprador_id) === String(data.vendedor_id)) {
@@ -226,6 +250,13 @@ class TransaccionService {
     return this.repo.insert(data);
   }
 
+  /**
+   * @function listar
+   * @desc Obtener lista de transacciones con filtros
+   * @param {Object} filtro - Parámetros de filtro
+   * @returns {Promise<Array>} Array de transacciones filtradas
+   * @access Private
+   */
   async listar(filtro = {}) {
     const q = {};
     if (filtro.comprador_id && this.#isObjectId(filtro.comprador_id)) q.comprador_id = filtro.comprador_id;
@@ -234,11 +265,28 @@ class TransaccionService {
     return this.repo.findAll(q);
   }
 
+  /**
+   * @function obtenerPorId
+   * @desc Obtener una transacción por su ID
+   * @param {String} id - ID de la transacción
+   * @returns {Promise<Object|null>} Transacción encontrada o null
+   * @throws {Error} Si el ID es inválido
+   * @access Private
+   */
   async obtenerPorId(id) {
     if (!this.#isObjectId(id)) throw new Error('ID inválido');
     return this.repo.findById(id);
   }
 
+  /**
+   * @function actualizar
+   * @desc Actualizar datos de una transacción con validaciones de estado
+   * @param {String} id - ID de la transacción
+   * @param {Object} data - Datos a actualizar
+   * @returns {Promise<Object|null>} Transacción actualizada o null
+   * @throws {Error} Si el ID es inválido o cambio de estado es inválido
+   * @access Private
+   */
   async actualizar(id, data) {
     if (!this.#isObjectId(id)) throw new Error('ID inválido');
 
@@ -252,6 +300,14 @@ class TransaccionService {
     return this.repo.update(id, data);
   }
 
+  /**
+   * @function eliminar
+   * @desc Eliminar una transacción
+   * @param {String} id - ID de la transacción
+   * @returns {Promise<Object|null>} Transacción eliminada o null
+   * @throws {Error} Si el ID es inválido
+   * @access Private
+   */
   async eliminar(id) {
     if (!this.#isObjectId(id)) throw new Error('ID inválido');
     return this.repo.delete(id);

@@ -1,10 +1,14 @@
-// tests/publicacion.service.test.js
+/**
+ * @test PublicacionService (Mongo en memoria)
+ * @desc Suite de pruebas unitarias para el PublicacionService con validación de negocio
+ * @note Utiliza MongoMemoryServer para ejecutar pruebas sin base de datos real
+ */
+
 jest.setTimeout(30000);
 
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
-// Importa tus piezas reales
 const { PublicacionModel } = require('../models/Publicacion');
 const PublicacionService = require('../services/PublicacionService');
 
@@ -12,19 +16,17 @@ describe('PublicacionService (Mongo en memoria)', () => {
   let mongo;
   let svc;
 
-  // ========= Setup / Teardown =========
   beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     await mongoose.connect(mongo.getUri(), { dbName: 'testdb' });
 
-    // (Opcional) índices útiles
     try {
       PublicacionModel.schema.index({ vendedor_id: 1, fecha_publicacion: -1 });
       PublicacionModel.schema.index({ categoria: 1, precio: 1, fecha_publicacion: -1 });
       await PublicacionModel.createIndexes();
     } catch (_) {}
 
-    svc = new PublicacionService(); // usa el repo real por defecto
+    svc = new PublicacionService();
   });
 
   afterAll(async () => {
@@ -36,7 +38,6 @@ describe('PublicacionService (Mongo en memoria)', () => {
     await PublicacionModel.deleteMany({});
   });
 
-  // ========= Helpers / Seeds =========
   const vendedorA = new mongoose.Types.ObjectId();
   const vendedorB = new mongoose.Types.ObjectId();
 
@@ -93,7 +94,10 @@ describe('PublicacionService (Mongo en memoria)', () => {
     ]);
   }
 
-  // ========= Tests: Creación / Obtener =========
+  /**
+   * @test create() crea y valida campos obligatorios
+   * @desc Verifica que se puede crear una publicación con validación de campos requeridos
+   */
   test('create() crea y valida campos obligatorios', async () => {
     const created = await svc.create({
       tipo_publicacion: 'producto',
@@ -108,17 +112,24 @@ describe('PublicacionService (Mongo en memoria)', () => {
     expect(created.titulo).toBe('Mouse inalámbrico');
   });
 
+  /**
+   * @test create() falla si falta un campo requerido
+   * @desc Valida que el servicio rechaza publicaciones incompletas
+   */
   test('create() falla si falta un campo requerido', async () => {
     await expect(svc.create({
       tipo_publicacion: 'producto',
       vendedor_id: vendedorA.toString(),
-      // titulo falta
       descripcion: 'desc',
       categoria: 'X',
       precio: 10
     })).rejects.toThrow('Falta campo obligatorio: titulo');
   });
 
+  /**
+   * @test create() valida tipo_publicacion y precio
+   * @desc Verifica validación de tipo de publicación y precio positivo
+   */
   test('create() valida tipo_publicacion y precio', async () => {
     await expect(svc.create({
       tipo_publicacion: 'otro',
@@ -139,6 +150,10 @@ describe('PublicacionService (Mongo en memoria)', () => {
     })).rejects.toThrow('precio inválido');
   });
 
+  /**
+   * @test getById() regresa una publicación y valida ID
+   * @desc Valida que se puede recuperar una publicación por ID y rechaza IDs inválidos
+   */
   test('getById() regresa una publicación y valida ID', async () => {
     const created = await svc.create({
       tipo_publicacion: 'servicio',
@@ -155,7 +170,10 @@ describe('PublicacionService (Mongo en memoria)', () => {
     await expect(svc.getById('id-invalido')).rejects.toThrow('ID inválido');
   });
 
-  // ========= Tests: Listado / Filtros =========
+  /**
+   * @test list() filtra por categoria + precioMin/Max + titulo (regex)
+   * @desc Verifica filtros múltiples en búsqueda de publicaciones
+   */
   test('list() filtra por categoria + precioMin/Max + titulo (regex)', async () => {
     await seed();
     const res = await svc.list({
@@ -171,6 +189,10 @@ describe('PublicacionService (Mongo en memoria)', () => {
     expect(res.items[0].titulo).toMatch(/Laptop gamer RTX/i);
   });
 
+  /**
+   * @test list() filtra por vendedor y tipo_publicacion
+   * @desc Valida filtros por vendedor específico y tipo de publicación
+   */
   test('list() filtra por vendedor y tipo_publicacion', async () => {
     await seed();
     const res = await svc.list({
@@ -181,14 +203,22 @@ describe('PublicacionService (Mongo en memoria)', () => {
     expect(res.items[0].titulo).toBe('Clases de programación');
   });
 
+  /**
+   * @test list() aplica visible=true por defecto (excluye ocultas)
+   * @desc Verifica que solo retorna publicaciones visibles por defecto
+   */
   test('list() aplica visible=true por defecto (excluye ocultas)', async () => {
     await seed();
     const res = await svc.list({});
-    expect(res.total).toBe(3); // 4 docs, 1 es visible:false
+    expect(res.total).toBe(3);
     const titles = res.items.map(i => i.titulo);
     expect(titles).not.toContain('Silla gamer');
   });
 
+  /**
+   * @test list() filtra por rango de fechas
+   * @desc Valida filtro por fechaDesde y fechaHasta en fecha_publicacion
+   */
   test('list() filtra por rango de fechas', async () => {
     await seed();
     const res = await svc.list({
@@ -202,6 +232,10 @@ describe('PublicacionService (Mongo en memoria)', () => {
     expect(fechas).toContain(new Date('2025-10-20').toISOString());
   });
 
+  /**
+   * @test listBySeller() y searchByTitle()
+   * @desc Verifica métodos especializados para listar por vendedor y buscar por título
+   */
   test('listBySeller() y searchByTitle()', async () => {
     await seed();
    const bySeller = await svc.listBySeller(vendedorB.toString(), { sort: '-fecha_publicacion' });
@@ -211,7 +245,10 @@ expect(bySeller.total).toBe(1)
     expect(byTitle.items[0].titulo).toMatch(/Teclado mecánico RGB/i);
   });
 
-  // ========= Tests: Actualizaciones / Estado / Vistas =========
+  /**
+   * @test update() actualiza y valida reglas
+   * @desc Valida que se puede actualizar una publicación y rechaza datos inválidos
+   */
   test('update() actualiza y valida reglas', async () => {
     const created = await svc.create({
       tipo_publicacion: 'producto',
@@ -231,6 +268,10 @@ expect(bySeller.total).toBe(1)
       .rejects.toThrow('precio inválido');
   });
 
+  /**
+   * @test setVisibility() oculta/muestra
+   * @desc Verifica el cambio de visibilidad de una publicación
+   */
   test('setVisibility() oculta/muestra', async () => {
     const created = await svc.create({
       tipo_publicacion: 'producto',
@@ -246,6 +287,10 @@ expect(bySeller.total).toBe(1)
     expect(upd.visible).toBe(false);
   });
 
+  /**
+   * @test setStatus() cambia estado (si está permitido)
+   * @desc Valida cambio de estado con validación de estados permitidos
+   */
   test('setStatus() cambia estado (si está permitido)', async () => {
     const created = await svc.create({
       tipo_publicacion: 'producto',
@@ -261,10 +306,13 @@ expect(bySeller.total).toBe(1)
     const upd = await svc.setStatus(created._id, 'pausado');
     expect(upd.estado).toBe('pausado');
 
-    // Estado inválido (si tu lista lo limita)
     await expect(svc.setStatus(created._id, 'xxx')).rejects.toThrow('Estado inválido');
   });
 
+  /**
+   * @test incrementViews() suma vistas
+   * @desc Verifica que el contador de vistas se incrementa correctamente
+   */
   test('incrementViews() suma vistas', async () => {
     const created = await svc.create({
       tipo_publicacion: 'producto',
@@ -281,6 +329,10 @@ expect(bySeller.total).toBe(1)
     expect(after.vistas).toBe(3);
   });
 
+  /**
+   * @test delete() elimina
+   * @desc Valida que una publicación se elimina correctamente y ya no es recuperable
+   */
   test('delete() elimina', async () => {
     const created = await svc.create({
       tipo_publicacion: 'servicio',

@@ -1,3 +1,9 @@
+/**
+ * @file server.js
+ * @desc Archivo principal de la aplicación Express para ItsonMarket
+ * @note Configura rutas, middleware, base de datos y servicio de archivos estáticos
+ */
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -22,6 +28,11 @@ app.use('/api/publicaciones', publicacionRoutes);
 app.use('/api/transacciones', transaccionRoutes);
 app.use('/api/chats', chatRoutes);
 
+/**
+ * @route GET /api/health
+ * @desc Endpoint de verificación de salud del servicio
+ * @access Public
+ */
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'OK',

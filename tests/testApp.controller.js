@@ -1,12 +1,15 @@
-// tests/testApp.controller.js
+/**
+ * @file testApp.controller.js
+ * @desc Aplicación Express de prueba para testing del controlador de publicaciones
+ * @note Configura rutas de publicaciones, middleware de parsing JSON y errorHandler
+ */
+
 const express = require('express');
 const app = express();
 app.use(express.json());
 
-// Router manual minimalista para el controller
 const c = require('../controllers/publicacionController');
 
-// mapea igual que tus rutas reales (sólo lo necesario para probar)
 const r = express.Router();
 r.get('/', c.list);
 r.get('/buscar', c.searchByTitle);
@@ -21,7 +24,6 @@ r.delete('/:id', c.remove);
 
 app.use('/api/publicaciones', r);
 
-// tu error handler real
 const errorHandler = require('../middleware/errorHandler');
 app.use(errorHandler);
 

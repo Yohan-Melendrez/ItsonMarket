@@ -3,6 +3,14 @@ const TransaccionRepository = require("../repositories/TransaccionRepository");
 
 const transRepo = new TransaccionRepository();
 
+/**
+ * @function runTransaccionTests
+ * @desc Script de pruebas para validar funcionalidades del TransaccionRepository
+ * @description Ejecuta pruebas de inserción, búsqueda, filtrado, actualización y eliminación de transacciones
+ * @returns {Promise<void>}
+ * @access Private
+ * @note Este script conecta a MongoDB y ejecuta operaciones CRUD sobre la colección Transaccion
+ */
 async function runTransaccionTests() {
   try {
     console.log(" Iniciando pruebas del TransaccionRepository...");

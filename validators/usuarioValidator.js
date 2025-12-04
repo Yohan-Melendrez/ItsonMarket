@@ -1,5 +1,17 @@
 const { body } = require('express-validator');
 
+/**
+ * @validator crearUsuarioValidator
+ * @desc Valida los datos requeridos para crear un nuevo usuario
+ * @field {String} itson_id - ITSON ID numérico único (4-20 caracteres)
+ * @field {String} nombre - Nombre completo del usuario (2-100 caracteres, solo letras y espacios)
+ * @field {String} contrasena - Contraseña fuerte (mínimo 8 caracteres)
+ * @field {String} correo_institucional - Email del dominio @itson.edu.mx (obligatorio)
+ * @field {String} carrera - Carrera del usuario (opcional, máximo 100 caracteres)
+ * @field {String} telefono - Número telefónico (opcional, formato válido)
+ * @field {String} foto - URL de foto o imagen en Base64 (opcional)
+ * @access Private
+ */
 const crearUsuarioValidator = [
   body('itson_id')
     .notEmpty()
@@ -50,7 +62,6 @@ const crearUsuarioValidator = [
   body('foto')
     .optional()
     .custom(value => {
-      // Aceptar URL o Base64
       if (value && !value.startsWith('http') && !value.startsWith('data:image')) {
         throw new Error('La foto debe ser una URL válida o imagen en Base64');
       }
@@ -58,6 +69,16 @@ const crearUsuarioValidator = [
     })
 ];
 
+/**
+ * @validator actualizarUsuarioValidator
+ * @desc Valida los datos para actualizar información de un usuario existente
+ * @field {String} nombre - Nombre completo (opcional, 2-100 caracteres)
+ * @field {String} correo_institucional - Email del dominio @itson.edu.mx (opcional)
+ * @field {String} carrera - Carrera del usuario (opcional, máximo 100 caracteres)
+ * @field {String} telefono - Número telefónico (opcional, formato válido)
+ * @field {String} foto - URL de foto o imagen en Base64 (opcional)
+ * @access Private
+ */
 const actualizarUsuarioValidator = [
   body('nombre')
     .optional()
@@ -90,7 +111,6 @@ const actualizarUsuarioValidator = [
   body('foto')
     .optional()
     .custom(value => {
-      // Aceptar URL o Base64
       if (value && !value.startsWith('http') && !value.startsWith('data:image')) {
         throw new Error('La foto debe ser una URL válida o imagen en Base64');
       }

@@ -3,6 +3,14 @@ const ChatRepository = require("../repositories/ChatRepository");
 
 const chatRepo = new ChatRepository();
 
+/**
+ * @function runTests
+ * @desc Script de pruebas para validar funcionalidades del ChatRepository
+ * @description Ejecuta pruebas de inserción, búsqueda, actualización, filtrado y eliminación de chats
+ * @returns {Promise<void>}
+ * @access Private
+ * @note Este script conecta a MongoDB y ejecuta operaciones CRUD sobre la colección Chat
+ */
 async function runTests() {
   try {
     console.log(" Iniciando pruebas del ChatRepository...");

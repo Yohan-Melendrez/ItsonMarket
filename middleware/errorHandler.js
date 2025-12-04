@@ -1,7 +1,20 @@
+/**
+ * @function errorHandler
+ * @desc Middleware centralizador de errores que captura y formatea diferentes tipos de errores
+ * @param {Error} err - Objeto de error capturado
+ * @param {Object} req - Objeto de solicitud Express
+ * @param {Object} res - Objeto de respuesta Express
+ * @param {Function} next - Función para pasar al siguiente middleware
+ * @returns {void}
+ * @access Private
+ * @description Maneja errores de validación MongoDB, registros duplicados, casteo de ID, JWT y errores generales
+ * @example
+ * // Uso en la aplicación
+ * app.use(errorHandler);
+ */
 const errorHandler = (err, req, res, next) => {
   console.error('Error capturado:', err);
 
-  // Error de validación de MongoDB
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       error: 'Error de validación',
@@ -12,7 +25,6 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Error de registro duplicado en MongoDB
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue)[0];
     return res.status(400).json({
@@ -21,7 +33,6 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Error de casteo de MongoDB
   if (err.name === 'CastError') {
     return res.status(400).json({
       error: 'ID inválido',
@@ -29,7 +40,6 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Error JWT
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({
       error: 'Token inválido',
@@ -37,7 +47,6 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Error por defecto
   res.status(err.status || 500).json({
     error: 'Error interno del servidor',
     message: process.env.NODE_ENV === 'production' 

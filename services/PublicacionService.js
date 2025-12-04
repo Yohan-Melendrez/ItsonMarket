@@ -9,12 +9,11 @@ class PublicacionService {
     this.VALID_STATUS = ['disponible', 'pausado', 'vendido', 'agotado', 'inactivo'];
   }
 
-  // ==== Helpers ====
-// reemplaza tu _ensureObjectId por esta versión
+
   _ensureObjectId(id, name = 'id') {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       const err = new Error('Cast to ObjectId failed');
-      err.name = 'CastError';      // <- para que el errorHandler responda 400
+      err.name = 'CastError';      
       err.path = name;
       throw err;
     }
@@ -26,15 +25,23 @@ class PublicacionService {
     return { page: p, limit: l };
   }
 
-// helper para 404
+
   _notFound(msg = 'Publicación no encontrada') {
     const err = new Error(msg);
-    err.status = 404;              // <- para que el errorHandler responda 404
+    err.status = 404;              
     return err;
   }
 
-  // ==== Casos de uso ====
+  
 
+  /**
+   * @function create
+   * @desc Crear una nueva publicación con validación de datos obligatorios
+   * @param {Object} data - Datos de la publicación
+   * @returns {Promise<Object>} Publicación creada
+   * @throws {Error} Si falta campo obligatorio o datos inválidos
+   * @access Private
+   */
   async create(data) {
     const required = ['tipo_publicacion','vendedor_id','titulo','descripcion','categoria','precio'];
     for (const f of required) {
@@ -60,6 +67,14 @@ class PublicacionService {
     return this.repo.create(payload);
   }
 
+  /**
+   * @function getById
+   * @desc Obtener una publicación por su ID
+   * @param {String} id - ID de la publicación
+   * @returns {Promise<Object>} Publicación encontrada
+   * @throws {Error} Si el ID es inválido o publicación no existe
+   * @access Private
+   */
   async getById(id) {
     this._ensureObjectId(id);
     const pub = await this.repo.findById(id);
@@ -67,8 +82,15 @@ class PublicacionService {
     return pub;
   }
 
+  /**
+   * @function list
+   * @desc Obtener lista paginada de publicaciones con múltiples filtros
+   * @param {Object} params - Parámetros de filtro y paginación
+   * @returns {Promise<Object>} Objeto con publicaciones y información de paginación
+   * @throws {Error} Si los parámetros de filtro son inválidos
+   * @access Private
+   */
   async list(params = {}) {
-    // vendedor_id puede ser ObjectId o string, no validar como ObjectId
     if (params.tipo_publicacion && !this.VALID_TYPES.includes(params.tipo_publicacion)) {
       throw new Error('tipo_publicacion inválido');
     }
@@ -96,16 +118,41 @@ class PublicacionService {
     });
   }
 
+  /**
+   * @function listBySeller
+   * @desc Obtener todas las publicaciones de un vendedor específico
+   * @param {String} vendedor_id - ID del vendedor
+   * @param {Object} opts - Opciones adicionales de filtro
+   * @returns {Promise<Object>} Publicaciones del vendedor con paginación
+   * @access Private
+   */
   async listBySeller(vendedor_id, opts = {}) {
-    // Cuando se lista por vendedor, incluir publicaciones ocultas (son del propio vendedor)
     return this.list({ ...opts, vendedor_id, includeHidden: true });
   }
 
+  /**
+   * @function searchByTitle
+   * @desc Buscar publicaciones por título
+   * @param {String} titulo - Término de búsqueda
+   * @param {Object} opts - Opciones adicionales de filtro
+   * @returns {Promise<Object>} Publicaciones encontradas con paginación
+   * @throws {Error} Si el título está vacío
+   * @access Private
+   */
   async searchByTitle(titulo, opts = {}) {
     if (!titulo || !titulo.trim()) throw new Error('titulo requerido');
     return this.list({ ...opts, titulo: titulo.trim() });
   }
 
+  /**
+   * @function update
+   * @desc Actualizar datos de una publicación
+   * @param {String} id - ID de la publicación
+   * @param {Object} patch - Datos a actualizar
+   * @returns {Promise<Object>} Publicación actualizada
+   * @throws {Error} Si el ID es inválido, datos son inválidos o publicación no existe
+   * @access Private
+   */
   async update(id, patch) {
     this._ensureObjectId(id);
     
@@ -120,6 +167,15 @@ class PublicacionService {
     return upd;
   }
 
+  /**
+   * @function setVisibility
+   * @desc Cambiar la visibilidad de una publicación
+   * @param {String} id - ID de la publicación
+   * @param {Boolean} visible - Visibilidad (true/false)
+   * @returns {Promise<Object>} Publicación actualizada
+   * @throws {Error} Si el ID es inválido o publicación no existe
+   * @access Private
+   */
   async setVisibility(id, visible) {
     this._ensureObjectId(id);
     const upd = await this.repo.setVisibility(id, !!visible);
@@ -127,6 +183,15 @@ class PublicacionService {
     return upd;
   }
 
+  /**
+   * @function setStatus
+   * @desc Cambiar el estado de una publicación
+   * @param {String} id - ID de la publicación
+   * @param {String} estado - Nuevo estado (disponible, pausado, vendido, etc)
+   * @returns {Promise<Object>} Publicación actualizada
+   * @throws {Error} Si el ID es inválido, estado es inválido o publicación no existe
+   * @access Private
+   */
   async setStatus(id, estado) {
     this._ensureObjectId(id);
     if (this.VALID_STATUS.length && !this.VALID_STATUS.includes(estado)) {
@@ -137,6 +202,15 @@ class PublicacionService {
     return upd;
   }
 
+  /**
+   * @function incrementViews
+   * @desc Incrementar el contador de visualizaciones de una publicación
+   * @param {String} id - ID de la publicación
+   * @param {Number} inc - Cantidad a incrementar (por defecto 1)
+   * @returns {Promise<Object>} Publicación actualizada
+   * @throws {Error} Si el ID es inválido o publicación no existe
+   * @access Private
+   */
   async incrementViews(id, inc = 1) {
     this._ensureObjectId(id);
     const upd = await this.repo.incrementViews(id, Number(inc) || 1);
@@ -144,6 +218,14 @@ class PublicacionService {
     return upd;
   }
 
+  /**
+   * @function delete
+   * @desc Eliminar una publicación
+   * @param {String} id - ID de la publicación
+   * @returns {Promise<Object>} Publicación eliminada
+   * @throws {Error} Si el ID es inválido o publicación no existe
+   * @access Private
+   */
   async delete(id) {
     this._ensureObjectId(id);
     const del = await this.repo.deleteById(id);

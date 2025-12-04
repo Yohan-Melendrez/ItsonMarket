@@ -3,6 +3,14 @@ const { PublicacionRepository } = require("../repositories/PublicacionRepository
 
 const publicacionRepo = new PublicacionRepository();
 
+/**
+ * @function runPublicacionTests
+ * @desc Script de pruebas para validar funcionalidades del PublicacionRepository
+ * @description Ejecuta pruebas de creación, búsqueda, actualización y eliminación de publicaciones
+ * @returns {Promise<void>}
+ * @access Private
+ * @note Este script conecta a MongoDB y ejecuta operaciones CRUD sobre la colección Publicacion
+ */
 async function runPublicacionTests() {
   try {
     console.log("Iniciando pruebas del PublicacionRepository...");

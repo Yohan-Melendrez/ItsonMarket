@@ -1,3 +1,9 @@
+/**
+ * @test TransaccionService (Mongo en memoria)
+ * @desc Suite de pruebas unitarias para el TransaccionService con validación de negocio
+ * @note Utiliza MongoMemoryServer para ejecutar pruebas sin base de datos real
+ */
+
 jest.setTimeout(30000);
 
 const mongoose = require('mongoose');
@@ -59,6 +65,10 @@ describe('TransaccionService (Mongo en memoria)', () => {
     ]);
   }
 
+  /**
+   * @test crear() crea y valida campos obligatorios
+   * @desc Verifica que se puede crear una transacción con estado inicial predeterminado
+   */
   test('crear() crea y valida campos obligatorios', async () => {
     const created = await svc.crear({
       comprador_id: comprador.toString(),
@@ -71,6 +81,10 @@ describe('TransaccionService (Mongo en memoria)', () => {
     expect(created.estado).toBe('pendiente'); 
   });
 
+  /**
+   * @test crear() falla si comprador = vendedor o monto <= 0
+   * @desc Valida reglas de negocio: comprador y vendedor deben ser diferentes, monto positivo
+   */
   test('crear() falla si comprador = vendedor o monto <= 0', async () => {
     await expect(svc.crear({
       comprador_id: comprador.toString(),
@@ -89,6 +103,10 @@ describe('TransaccionService (Mongo en memoria)', () => {
     })).rejects.toThrow(/monto/i);
   });
 
+  /**
+   * @test obtenerPorId() valida ObjectId
+   * @desc Verifica que se puede recuperar una transacción por ID y rechaza IDs inválidos
+   */
   test('obtenerPorId() valida ObjectId', async () => {
     const trx = await svc.crear({
       comprador_id: comprador.toString(),
@@ -104,6 +122,10 @@ describe('TransaccionService (Mongo en memoria)', () => {
     await expect(svc.obtenerPorId('id-mal')).rejects.toThrow(/ID inválido/i);
   });
 
+  /**
+   * @test listar() permite filtrar por estado, comprador y vendedor
+   * @desc Valida filtros múltiples para obtener transacciones según criterios
+   */
   test('listar() permite filtrar por estado, comprador y vendedor', async () => {
     await seed();
 
@@ -117,6 +139,10 @@ describe('TransaccionService (Mongo en memoria)', () => {
     expect(porVendedor.length).toBe(2);
   });
 
+  /**
+   * @test actualizar() aplica reglas de negocio
+   * @desc Verifica que se validan cambios de estado y rechaza transiciones inválidas
+   */
   test('actualizar() aplica reglas de negocio', async () => {
     const trx = await svc.crear({
       comprador_id: comprador.toString(),
@@ -137,6 +163,10 @@ describe('TransaccionService (Mongo en memoria)', () => {
       .rejects.toThrow(/cancelada a completada/i);
   });
 
+  /**
+   * @test eliminar() borra la transacción
+   * @desc Valida que una transacción se elimina correctamente y ya no es recuperable
+   */
   test('eliminar() borra la transacción', async () => {
     const trx = await svc.crear({
       comprador_id: comprador.toString(),

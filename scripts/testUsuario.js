@@ -3,6 +3,14 @@ const UsuarioDAO = require("../repositories/UsuarioRepository");
 
 const usuarioRepo = new UsuarioDAO();
 
+/**
+ * @function runUsuarioTests
+ * @desc Script de pruebas para validar funcionalidades del UsuarioRepository
+ * @description Ejecuta pruebas de inserción, búsqueda, actualización y eliminación de usuarios por ID e ITSON ID
+ * @returns {Promise<void>}
+ * @access Private
+ * @note Este script conecta a MongoDB y ejecuta operaciones CRUD sobre la colección Usuario
+ */
 async function runUsuarioTests() {
   try {
     console.log(" Iniciando pruebas del UsuarioRepository...");

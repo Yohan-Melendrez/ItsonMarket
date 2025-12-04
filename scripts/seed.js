@@ -6,7 +6,6 @@ const { TransaccionModel } = require("../models/Transaccion");
 const { ChatModel } = require("../models/Chat");
 const { connectDB, closeDB } = require("../config/db");
 
-// Datos de usuarios para prueba
 const usuariosData = [
   {
     itson_id: "00000123456",
@@ -64,9 +63,7 @@ const usuariosData = [
   }
 ];
 
-// Datos de publicaciones relacionadas con escuela
 const publicacionesData = [
-  // PRODUCTOS
   {
     tipo_publicacion: "producto",
     titulo: "Libro de Cálculo Diferencial",
@@ -260,25 +257,36 @@ const publicacionesData = [
   }
 ];
 
-// Función para hashear contraseñas
+/**
+ * @function hashPassword
+ * @desc Generar hash bcrypt de una contraseña
+ * @param {String} password - Contraseña en texto plano
+ * @returns {Promise<String>} Contraseña hasheada
+ * @access Private
+ */
 async function hashPassword(password) {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
 }
 
-// Función principal para sembrar la base de datos
+/**
+ * @function seedDatabase
+ * @desc Función principal que popula la base de datos con datos de prueba
+ * @description Limpia colecciones existentes e inserta usuarios, publicaciones, transacciones y chats de ejemplo
+ * @returns {Promise<void>}
+ * @access Private
+ * @note Contraseña de prueba para todos los usuarios: Password123.
+ */
 async function seedDatabase() {
   try {
     await connectDB();
 
-    // Limpiar colecciones existentes
     await UsuarioModel.deleteMany({});
     await PublicacionModel.deleteMany({});
     await TransaccionModel.deleteMany({});
     await ChatModel.deleteMany({});
     console.log("✓ Colecciones limpias");
 
-    // Insertar usuarios con contraseñas hasheadas
     const usuariosConHash = await Promise.all(
       usuariosData.map(async (usuario) => ({
         ...usuario,
@@ -289,7 +297,6 @@ async function seedDatabase() {
     const usuariosInsertados = await UsuarioModel.insertMany(usuariosConHash);
     console.log(`✓ ${usuariosInsertados.length} usuarios creados`);
 
-    // Asignar vendedor_id a las publicaciones
     const publicacionesConVendedor = publicacionesData.map((pub, index) => ({
       ...pub,
       vendedor_id: usuariosInsertados[index % usuariosInsertados.length]._id
@@ -300,7 +307,6 @@ async function seedDatabase() {
     );
     console.log(`✓ ${publicacionesInsertadas.length} publicaciones creadas`);
 
-    // Crear transacciones de ejemplo
     const transacciones = [
       {
         comprador_id: usuariosInsertados[1]._id,
@@ -349,7 +355,6 @@ async function seedDatabase() {
     const transaccionesInsertadas = await TransaccionModel.insertMany(transacciones);
     console.log(`✓ ${transaccionesInsertadas.length} transacciones creadas`);
 
-    // Actualizar reputación de vendedores
     for (let vendedorId of [usuariosInsertados[0]._id, usuariosInsertados[1]._id]) {
       const transaccionesVendedor = await TransaccionModel.find({
         vendedor_id: vendedorId,
@@ -370,7 +375,6 @@ async function seedDatabase() {
     }
     console.log("✓ Reputación de vendedores actualizada");
 
-    // Crear chats de ejemplo
     const chats = [
       {
         participantes: [usuariosInsertados[0]._id, usuariosInsertados[1]._id],
@@ -411,25 +415,24 @@ async function seedDatabase() {
     const chatsInsertados = await ChatModel.insertMany(chats);
     console.log(`✓ ${chatsInsertados.length} chats creados`);
 
-    console.log("\n✅ Base de datos sembrada exitosamente");
-    console.log("\n📊 Resumen:");
+    console.log("\n Base de datos sembrada exitosamente");
+    console.log("\n Resumen:");
     console.log(`   - ${usuariosInsertados.length} usuarios`);
     console.log(`   - ${publicacionesInsertadas.length} publicaciones`);
     console.log(`   - ${transaccionesInsertadas.length} transacciones`);
     console.log(`   - ${chatsInsertados.length} chats`);
 
-    console.log("\n🔐 Contraseña para todos los usuarios: Password123.");
-    console.log("\n👥 Usuarios de prueba:");
+    console.log("\n Contraseña para todos los usuarios: Password123.");
+    console.log("\n Usuarios de prueba:");
     usuariosData.forEach((u) => {
       console.log(`   - ${u.nombre} (${u.correo_institucional})`);
     });
 
   } catch (error) {
-    console.error("❌ Error al sembrar la base de datos:", error.message);
+    console.error(" Error al sembrar la base de datos:", error.message);
   } finally {
     await closeDB();
   }
 }
 
-// Ejecutar seed
 seedDatabase();

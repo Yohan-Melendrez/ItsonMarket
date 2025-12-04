@@ -1,5 +1,17 @@
 const jwt = require('jsonwebtoken');
 
+/**
+ * @function authMiddleware
+ * @desc Middleware de autenticación que valida el token JWT en el encabezado Authorization
+ * @param {Object} req - Objeto de solicitud Express
+ * @param {Object} res - Objeto de respuesta Express
+ * @param {Function} next - Función para pasar al siguiente middleware
+ * @returns {void}
+ * @access Private
+ * @example
+ * // Uso en rutas protegidas
+ * router.get('/api/usuarios', authMiddleware, obtenerUsuarios);
+ */
 const authMiddleware = (req, res, next) => {
   try {
     const authHeader = req.header('Authorization');
@@ -16,10 +28,8 @@ const authMiddleware = (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'clave_secreta_itson');
       
-      // Manejar diferentes formatos de payload del token
       const payload = decoded.user || decoded;
 
-      // Normalizar el ID del usuario - puede venir como sub, userId, id, o _id
       const usuarioId = payload.sub || payload.userId || payload.id || payload._id;
       
       if (usuarioId) {

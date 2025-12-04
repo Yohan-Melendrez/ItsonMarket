@@ -1,10 +1,13 @@
-// tests/publicaciones.controller.unit.test.js
+/**
+ * @test Controller de Publicaciones (unit con service mockeado)
+ * @desc Suite de pruebas unitarias para el controlador de publicaciones con service mockeado
+ * @note Utiliza Jest mocks para simular el comportamiento del PublicacionService
+ */
+
 jest.setTimeout(20000);
 
-// 1) Mock de auth (si tus rutas reales lo usan; aquí el testApp no lo aplica, pero por si acaso)
 jest.mock('../middleware/auth', () => (req, res, next) => next());
 
-// 2) Crea un mock compartido del service
 const mockSvc = {
   create: jest.fn(),
   getById: jest.fn(),
@@ -18,21 +21,22 @@ const mockSvc = {
   delete: jest.fn(),
 };
 
-// 3) Mockea el módulo PublicacionService **antes** de requerir controller/app
 jest.mock('../services/PublicacionService', () => {
   return jest.fn().mockImplementation(() => mockSvc);
 });
 
 const request = require('supertest');
-const app = require('./testApp.controller'); // usa el app minimal
+const app = require('./testApp.controller');
 
 describe('Controller de Publicaciones (unit con service mockeado)', () => {
   beforeEach(() => {
-    // limpia invocaciones y resets
     for (const k of Object.keys(mockSvc)) mockSvc[k].mockReset();
   });
 
-  // ========== ÉXITOS ==========
+  /**
+   * @test GET /api/publicaciones/:id -> 200 con body
+   * @desc Valida que obtener una publicación por ID retorna 200 con los datos
+   */
   test('GET /api/publicaciones/:id -> 200 con body', async () => {
     mockSvc.getById.mockResolvedValue({ _id: '66f..abc', titulo: 'Demo' });
 
@@ -43,6 +47,10 @@ describe('Controller de Publicaciones (unit con service mockeado)', () => {
     expect(res.body.titulo).toBe('Demo');
   });
 
+  /**
+   * @test POST /api/publicaciones -> 201 Created
+   * @desc Verifica que crear una publicación retorna 201 y llama al service correctamente
+   */
   test('POST /api/publicaciones -> 201 Created', async () => {
     const body = { tipo_publicacion:'producto', vendedor_id:'66f000000000000000000aaa', titulo:'X', descripcion:'Y', categoria:'Z', precio:100 };
     mockSvc.create.mockResolvedValue({ _id: '66f..def', ...body });
@@ -53,6 +61,10 @@ describe('Controller de Publicaciones (unit con service mockeado)', () => {
     expect(mockSvc.create).toHaveBeenCalledWith(body);
   });
 
+  /**
+   * @test DELETE /api/publicaciones/:id -> 204 No Content
+   * @desc Valida que eliminar una publicación retorna 204 sin contenido
+   */
   test('DELETE /api/publicaciones/:id -> 204 No Content', async () => {
     mockSvc.delete.mockResolvedValue({ _id: '66f..del' });
 
@@ -63,7 +75,10 @@ describe('Controller de Publicaciones (unit con service mockeado)', () => {
     expect(res.text).toBe(''); // sin body
   });
 
-  // ========== ERRORES (ver que viajan al errorHandler) ==========
+  /**
+   * @test GET /api/publicaciones/:id -> 404 cuando el service lanza NotFoundError
+   * @desc Verifica que el errorHandler convierte errores 404 del service a respuesta HTTP 404
+   */
   test('GET /api/publicaciones/:id -> 404 cuando el service lanza NotFoundError', async () => {
     const err = new Error('Publicación no encontrada');
     err.status = 404; // tu errorHandler respeta err.status
@@ -76,6 +91,10 @@ describe('Controller de Publicaciones (unit con service mockeado)', () => {
     expect(res.body).toHaveProperty('message');
   });
 
+  /**
+   * @test GET /api/publicaciones/:id -> 400 cuando el service lanza CastError
+   * @desc Valida que errores de ID inválido retornan 400
+   */
   test('GET /api/publicaciones/:id -> 400 cuando el service lanza CastError', async () => {
     const err = new Error('Cast to ObjectId failed');
     err.name = 'CastError';
@@ -87,6 +106,10 @@ describe('Controller de Publicaciones (unit con service mockeado)', () => {
     expect(res.body.error).toMatch(/ID inválido/i);
   });
 
+  /**
+   * @test POST /api/publicaciones -> 400 cuando el service lanza ValidationError
+   * @desc Verifica que errores de validación retornan 400 con detalles de los campos
+   */
   test('POST /api/publicaciones -> 400 cuando el service lanza ValidationError', async () => {
     const validationErr = new Error('ValidationError');
     validationErr.name = 'ValidationError';
@@ -102,6 +125,10 @@ describe('Controller de Publicaciones (unit con service mockeado)', () => {
     expect(res.body.details[0]).toEqual({ field: 'titulo', message: 'titulo requerido' });
   });
 
+  /**
+   * @test PATCH /api/publicaciones/:id/estado -> 500 por error inesperado
+   * @desc Valida que errores inesperados retornan 500
+   */
   test('PATCH /api/publicaciones/:id/estado -> 500 por error inesperado', async () => {
     mockSvc.setStatus.mockRejectedValue(new Error('boom'));
 

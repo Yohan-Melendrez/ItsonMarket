@@ -2,8 +2,15 @@ const { body } = require('express-validator');
 const { UsuarioModel } = require('../models/Usuario');
 const { PublicacionModel } = require('../models/Publicacion');
 
+/**
+ * @validator crearChatValidator
+ * @desc Valida los datos requeridos para crear un nuevo chat
+ * @field {Array} participantes - Mínimo 2 participantes que deben existir en la base de datos
+ * @field {String} publicacion_id - ID válido de MongoDB de una publicación existente
+ * @field {Array} mensajes - Array opcional de mensajes iniciales
+ * @access Private
+ */
 const crearChatValidator = [
-  // Validar participantes
   body('participantes')
     .isArray({ min: 2 })
     .withMessage('Debe incluir al menos dos participantes')
@@ -15,7 +22,6 @@ const crearChatValidator = [
       return true;
     }),
 
-  // Validar publicacion
   body('publicacion_id')
     .notEmpty()
     .withMessage('El campo publicacion_id es obligatorio')
@@ -27,13 +33,18 @@ const crearChatValidator = [
       return true;
     }),
 
-  // Validar mensajes opcionales
   body('mensajes')
     .optional()
     .isArray()
     .withMessage('El campo mensajes debe ser un arreglo'),
 ];
 
+/**
+ * @validator actualizarChatValidator
+ * @desc Valida los datos permitidos para actualizar un chat
+ * @field {String} estado - Estado del chat (activo o cerrado)
+ * @access Private
+ */
 const actualizarChatValidator = [
   body('estado')
     .optional()
@@ -41,7 +52,14 @@ const actualizarChatValidator = [
     .withMessage('El estado debe ser activo o cerrado'),
 ];
 
-// Validador para envío de mensajes
+/**
+ * @validator enviarMensajeValidator
+ * @desc Valida los datos requeridos para enviar un mensaje en un chat
+ * @field {String} contenido - Contenido del mensaje (obligatorio y debe ser texto)
+ * @field {String} tipo - Tipo de mensaje (texto, imagen o archivo, opcional)
+ * @field {String} remitente_id - ID válido del usuario que envía el mensaje (opcional)
+ * @access Private
+ */
 const enviarMensajeValidator = [
   body('contenido')
     .notEmpty()

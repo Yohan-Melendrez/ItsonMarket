@@ -9,8 +9,11 @@ const bcrypt = require('bcrypt');
 
 /**
  * @route POST /api/auth/login
- * @desc Autenticar usuario y generar JWT
+ * @desc Autenticar usuario con ITSON ID y contraseña, genera JWT
  * @access Public
+ * @param {String} itson_id - ITSON ID del usuario
+ * @param {String} contrasena - Contraseña del usuario
+ * @returns {Object} Token JWT y datos del usuario autenticado
  */
 // LOGIN
 router.post('/login', [
@@ -70,8 +73,14 @@ router.post('/login', [
 
 
 /**
- * POST /api/auth/register
- * Público: registra y devuelve token
+ * @route POST /api/auth/register
+ * @desc Registrar nuevo usuario con validación de contraseña fuerte
+ * @access Public
+ * @param {String} itson_id - ITSON ID único del usuario
+ * @param {String} contrasena - Contraseña (debe ser fuerte)
+ * @param {String} nombre - Nombre completo del usuario
+ * @param {String} correo_institucional - Email institucional válido
+ * @returns {Object} Token JWT y datos del usuario registrado
  */
 router.post('/register', [
   body('itson_id').notEmpty(),
@@ -133,8 +142,10 @@ router.post('/register', [
 
 /**
  * @route POST /api/auth/verify
- * @desc Verificar token JWT
+ * @desc Verificar validez del token JWT proporcionado
  * @access Public
+ * @param {String} Authorization - Header con token en formato "Bearer <token>"
+ * @returns {Object} Estado de validez del token y datos decodificados
  */
 router.post('/verify', (req, res) => {
   try {

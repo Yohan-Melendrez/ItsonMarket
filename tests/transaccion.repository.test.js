@@ -1,3 +1,9 @@
+/**
+ * @test TransaccionRepository (Mongo en memoria)
+ * @desc Suite de pruebas unitarias para el TransaccionRepository
+ * @note Utiliza MongoMemoryServer para ejecutar pruebas sin base de datos real
+ */
+
 jest.setTimeout(30000);
 
 const mongoose = require('mongoose');
@@ -43,6 +49,10 @@ describe('TransaccionRepository (Mongo en memoria)', () => {
     ]);
   }
 
+  /**
+   * @test insert() crea una transacción
+   * @desc Valida que se puede crear una nueva transacción con todos los datos requeridos
+   */
   test('insert() crea una transacción', async () => {
     const created = await repo.insert({
       comprador_id: comprador,
@@ -55,6 +65,10 @@ describe('TransaccionRepository (Mongo en memoria)', () => {
     expect(created.monto).toBe(150);
   });
 
+  /**
+   * @test findAll() admite filtro
+   * @desc Verifica que se pueden obtener todas las transacciones y filtrar por estado
+   */
   test('findAll() admite filtro', async () => {
     await seed();
     const todas = await repo.findAll({});
@@ -64,6 +78,10 @@ describe('TransaccionRepository (Mongo en memoria)', () => {
     expect(completadas.length).toBe(1);
   });
 
+  /**
+   * @test findById / update / delete
+   * @desc Valida operaciones completas de búsqueda, actualización y eliminación de transacciones
+   */
   test('findById / update / delete', async () => {
     const trx = await repo.insert({
       comprador_id: comprador,

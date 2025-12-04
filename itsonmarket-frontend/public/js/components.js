@@ -1,26 +1,46 @@
+/**
+ * @class NavbarComponent
+ * @extends HTMLElement
+ * @desc Barra de navegación dinámica con estado de autenticación.
+ */
 class NavbarComponent extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
+  /**
+   * @constructor
+   * @desc Inicializa shadow DOM del componente.
+   */
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
 
-    connectedCallback() {
-        this.render();
-        this.setupEventListeners();
-        
-        // Escuchar cambios de autenticación
-        window.addEventListener('auth-changed', () => this.updateAuthState());
-    }
+  /**
+   * @method connectedCallback
+   * @desc Renderiza el componente e inicializa eventos al conectarse al DOM.
+   */
+  connectedCallback() {
+    this.render();
+    this.setupEventListeners();
 
-    disconnectedCallback() {
-        window.removeEventListener('auth-changed', () => this.updateAuthState());
-    }
+    window.addEventListener("auth-changed", () => this.updateAuthState());
+  }
 
-    render() {
-        const isLoggedIn = window.AuthState?.isLoggedIn() || false;
-        const user = window.AuthState?.user || {};
+  /**
+   * @method disconnectedCallback
+   * @desc Limpia listeners cuando el componente se elimina del DOM.
+   */
+  disconnectedCallback() {
+    window.removeEventListener("auth-changed", () => this.updateAuthState());
+  }
 
-        this.shadowRoot.innerHTML = `
+  /**
+   * @method render
+   * @desc Renderiza estructura HTML del navbar según autenticación.
+   */
+  render() {
+    const isLoggedIn = window.AuthState?.isLoggedIn() || false;
+    const user = window.AuthState?.user || {};
+
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
@@ -300,11 +320,17 @@ class NavbarComponent extends HTMLElement {
                     </ul>
 
                     <!-- Usuario autenticado -->
-                    <div class="navbar-user ${isLoggedIn ? '' : 'hidden'}" id="userMenu">
+                    <div class="navbar-user ${
+                      isLoggedIn ? "" : "hidden"
+                    }" id="userMenu">
                         <div class="dropdown">
                             <div class="navbar-user-info" id="dropdownTrigger">
-                                <img src="${user.foto || '/imgs/default-avatar.svg'}" alt="Avatar" class="navbar-avatar" id="userAvatar">
-                                <span id="userName">${user.nombre || 'Usuario'}</span>
+                                <img src="${
+                                  user.foto || "/imgs/default-avatar.svg"
+                                }" alt="Avatar" class="navbar-avatar" id="userAvatar">
+                                <span id="userName">${
+                                  user.nombre || "Usuario"
+                                }</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -336,7 +362,9 @@ class NavbarComponent extends HTMLElement {
                     </div>
 
                     <!-- Links de auth (no logueado) -->
-                    <div class="navbar-user ${isLoggedIn ? 'hidden' : ''}" id="authLinks">
+                    <div class="navbar-user ${
+                      isLoggedIn ? "hidden" : ""
+                    }" id="authLinks">
                         <a href="#/login" class="btn btn-ghost">Iniciar Sesión</a>
                         <a href="#/register" class="btn btn-primary">Registrarse</a>
                     </div>
@@ -349,107 +377,151 @@ class NavbarComponent extends HTMLElement {
                 </div>
             </nav>
         `;
+  }
+
+  /**
+   * @method setupEventListeners
+   * @desc Configura eventos para dropdown, logout y menú móvil.
+   */
+  setupEventListeners() {
+    // Toggle dropdown
+    const trigger = this.shadowRoot.getElementById("dropdownTrigger");
+    const dropdown = this.shadowRoot.getElementById("dropdownMenu");
+
+    if (trigger && dropdown) {
+      trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle("show");
+      });
+
+      // Cerrar al hacer clic fuera
+      document.addEventListener("click", () => {
+        dropdown.classList.remove("show");
+      });
     }
 
-    setupEventListeners() {
-        // Toggle dropdown
-        const trigger = this.shadowRoot.getElementById('dropdownTrigger');
-        const dropdown = this.shadowRoot.getElementById('dropdownMenu');
-        
-        if (trigger && dropdown) {
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdown.classList.toggle('show');
-            });
-
-            // Cerrar al hacer clic fuera
-            document.addEventListener('click', () => {
-                dropdown.classList.remove('show');
-            });
+    // Logout
+    const logoutBtn = this.shadowRoot.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        if (window.AuthState) {
+          window.AuthState.logout();
         }
-
-        // Logout
-        const logoutBtn = this.shadowRoot.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                if (window.AuthState) {
-                    window.AuthState.logout();
-                }
-                this.updateAuthState();
-            });
-        }
-
-        // Mobile toggle
-        const mobileToggle = this.shadowRoot.getElementById('mobileToggle');
-        const mainMenu = this.shadowRoot.getElementById('mainMenu');
-        if (mobileToggle && mainMenu) {
-            mobileToggle.addEventListener('click', () => {
-                mainMenu.classList.toggle('mobile-open');
-            });
-        }
+        this.updateAuthState();
+      });
     }
 
-    updateAuthState() {
-        const isLoggedIn = window.AuthState?.isLoggedIn() || false;
-        const user = window.AuthState?.user || {};
-
-        const userMenu = this.shadowRoot.getElementById('userMenu');
-        const authLinks = this.shadowRoot.getElementById('authLinks');
-        const userAvatar = this.shadowRoot.getElementById('userAvatar');
-        const userName = this.shadowRoot.getElementById('userName');
-
-        if (isLoggedIn) {
-            userMenu?.classList.remove('hidden');
-            authLinks?.classList.add('hidden');
-            if (userAvatar) userAvatar.src = user.foto || '/imgs/default-avatar.svg';
-            if (userName) userName.textContent = user.nombre || 'Usuario';
-        } else {
-            userMenu?.classList.add('hidden');
-            authLinks?.classList.remove('hidden');
-        }
+    // Mobile toggle
+    const mobileToggle = this.shadowRoot.getElementById("mobileToggle");
+    const mainMenu = this.shadowRoot.getElementById("mainMenu");
+    if (mobileToggle && mainMenu) {
+      mobileToggle.addEventListener("click", () => {
+        mainMenu.classList.toggle("mobile-open");
+      });
     }
+  }
+
+  /**
+   * @method updateAuthState
+   * @desc Actualiza visualmente el navbar al cambiar el estado de autenticación.
+   */
+  updateAuthState() {
+    const isLoggedIn = window.AuthState?.isLoggedIn() || false;
+    const user = window.AuthState?.user || {};
+
+    const userMenu = this.shadowRoot.getElementById("userMenu");
+    const authLinks = this.shadowRoot.getElementById("authLinks");
+    const userAvatar = this.shadowRoot.getElementById("userAvatar");
+    const userName = this.shadowRoot.getElementById("userName");
+
+    if (isLoggedIn) {
+      userMenu?.classList.remove("hidden");
+      authLinks?.classList.add("hidden");
+      if (userAvatar) userAvatar.src = user.foto || "/imgs/default-avatar.svg";
+      if (userName) userName.textContent = user.nombre || "Usuario";
+    } else {
+      userMenu?.classList.add("hidden");
+      authLinks?.classList.remove("hidden");
+    }
+  }
 }
 
+/**
+ * @class PublicacionCard
+ * @extends HTMLElement
+ * @desc Tarjeta visual para mostrar una publicación en la lista.
+ */
 class PublicacionCard extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+  /**
+   * @constructor
+   * @desc Inicializa shadow DOM del componente.
+   */
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  /**
+   * @method observedAttributes
+   * @desc Atributos observados para re-render automático.
+   * @returns {Array<string>}
+   */
+  static get observedAttributes() {
+    return [
+      "pub-id",
+      "titulo",
+      "descripcion",
+      "precio",
+      "imagen",
+      "categoria",
+      "tipo",
+      "fecha",
+      "estado",
+    ];
+  }
+
+  /**
+   * @method connectedCallback
+   * @desc Renderiza y registra eventos al insertarse en el DOM.
+   */
+  connectedCallback() {
+    this.render();
+    this.setupEventListeners();
+  }
+
+  /**
+   * @method attributeChangedCallback
+   * @desc Re-renderiza la tarjeta al cambiar atributos.
+   */
+  attributeChangedCallback() {
+    if (this.shadowRoot) {
+      this.render();
     }
+  }
 
-    static get observedAttributes() {
-        return ['pub-id', 'titulo', 'descripcion', 'precio', 'imagen', 'categoria', 'tipo', 'fecha', 'estado'];
-    }
+  /**
+   * @method render
+   * @desc Construye la interfaz visual de la tarjeta.
+   */
+  render() {
+    const id = this.getAttribute("pub-id") || "";
+    const titulo = this.getAttribute("titulo") || "Sin título";
+    const descripcion = this.getAttribute("descripcion") || "";
+    const precio = parseFloat(this.getAttribute("precio")) || 0;
+    const imagen = this.getAttribute("imagen") || "/imgs/default-product.svg";
+    const categoria = this.getAttribute("categoria") || "Sin categoría";
+    const tipo = this.getAttribute("tipo") || "producto";
+    const fecha = this.getAttribute("fecha") || "";
+    const estado = this.getAttribute("estado") || "activo";
 
-    connectedCallback() {
-        this.render();
-        this.setupEventListeners();
-    }
+    const precioFormateado = new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(precio);
 
-    attributeChangedCallback() {
-        if (this.shadowRoot) {
-            this.render();
-        }
-    }
+    const fechaFormateada = fecha ? this.formatRelativeTime(fecha) : "";
 
-    render() {
-        const id = this.getAttribute('pub-id') || '';
-        const titulo = this.getAttribute('titulo') || 'Sin título';
-        const descripcion = this.getAttribute('descripcion') || '';
-        const precio = parseFloat(this.getAttribute('precio')) || 0;
-        const imagen = this.getAttribute('imagen') || '/imgs/default-product.svg';
-        const categoria = this.getAttribute('categoria') || 'Sin categoría';
-        const tipo = this.getAttribute('tipo') || 'producto';
-        const fecha = this.getAttribute('fecha') || '';
-        const estado = this.getAttribute('estado') || 'activo';
-
-        const precioFormateado = new Intl.NumberFormat('es-MX', {
-            style: 'currency',
-            currency: 'MXN'
-        }).format(precio);
-
-        const fechaFormateada = fecha ? this.formatRelativeTime(fecha) : '';
-
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
@@ -571,12 +643,20 @@ class PublicacionCard extends HTMLElement {
             <div class="card" data-id="${id}">
                 <div class="image-container">
                     <img src="${imagen}" alt="${titulo}" onerror="this.src='/imgs/default-product.svg'">
-                    ${tipo === 'servicio' ? '<span class="badge badge-servicio">Servicio</span>' : ''}
-                    ${estado === 'vendido' ? `
+                    ${
+                      tipo === "servicio"
+                        ? '<span class="badge badge-servicio">Servicio</span>'
+                        : ""
+                    }
+                    ${
+                      estado === "vendido"
+                        ? `
                         <div class="vendido-overlay">
                             <span class="vendido-badge">Vendido</span>
                         </div>
-                    ` : ''}
+                    `
+                        : ""
+                    }
                 </div>
                 <div class="content">
                     <p class="categoria">${categoria}</p>
@@ -589,113 +669,164 @@ class PublicacionCard extends HTMLElement {
                 </div>
             </div>
         `;
-    }
+  }
 
-    setupEventListeners() {
-        const card = this.shadowRoot.querySelector('.card');
-        if (card) {
-            card.addEventListener('click', () => {
-                const id = this.getAttribute('pub-id');
-                if (id && window.navigateTo) {
-                    window.navigateTo(`/publicaciones/${id}`);
-                }
-            });
+  /**
+   * @method setupEventListeners
+   * @desc Registra el evento de clic que navega al detalle de la publicación.
+   */
+  setupEventListeners() {
+    const card = this.shadowRoot.querySelector(".card");
+    if (card) {
+      card.addEventListener("click", () => {
+        const id = this.getAttribute("pub-id");
+        if (id && window.navigateTo) {
+          window.navigateTo(`/publicaciones/${id}`);
         }
+      });
     }
+  }
 
-    formatRelativeTime(dateStr) {
-        const now = new Date();
-        const date = new Date(dateStr);
-        const diff = now - date;
-        const seconds = Math.floor(diff / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
+  /**
+   * @method formatRelativeTime
+   * @desc Convierte una fecha a formato relativo (p. ej., "hace 2h").
+   * @param {string} dateStr - Fecha en string.
+   * @returns {string}
+   */
+  formatRelativeTime(dateStr) {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diff = now - date;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
 
-        if (days > 7) {
-            return new Intl.DateTimeFormat('es-MX', {
-                day: 'numeric',
-                month: 'short'
-            }).format(date);
-        }
-        if (days > 0) return `hace ${days}d`;
-        if (hours > 0) return `hace ${hours}h`;
-        if (minutes > 0) return `hace ${minutes}m`;
-        return 'ahora';
+    if (days > 7) {
+      return new Intl.DateTimeFormat("es-MX", {
+        day: "numeric",
+        month: "short",
+      }).format(date);
     }
+    if (days > 0) return `hace ${days}d`;
+    if (hours > 0) return `hace ${hours}h`;
+    if (minutes > 0) return `hace ${minutes}m`;
+    return "ahora";
+  }
 }
 
+/**
+ * @class TransaccionCard
+ * @extends HTMLElement
+ * @desc Tarjeta que muestra información de una transacción.
+ */
 class TransaccionCard extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+  /**
+   * @constructor
+   * @desc Inicializa shadow DOM.
+   */
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  /**
+   * @method observedAttributes
+   * @desc Atributos observados por el componente.
+   * @returns {Array<string>}
+   */
+  static get observedAttributes() {
+    return [
+      "trans-id",
+      "tipo",
+      "estado",
+      "titulo",
+      "imagen",
+      "monto",
+      "fecha",
+      "contraparte-nombre",
+      "contraparte-foto",
+      "calificacion",
+      "es-compra",
+    ];
+  }
+
+  /**
+   * @method connectedCallback
+   * @desc Renderiza la tarjeta al insertarse en el DOM.
+   */
+  connectedCallback() {
+    this.render();
+  }
+
+  /**
+   * @method attributeChangedCallback
+   * @desc Re-renderiza cuando un atributo cambia.
+   */
+  attributeChangedCallback() {
+    if (this.shadowRoot) {
+      this.render();
+    }
+  }
+
+  /**
+   * @method render
+   * @desc Construye la interfaz visual de la transacción.
+   */
+  render() {
+    const id = this.getAttribute("trans-id") || "";
+    const estado = this.getAttribute("estado") || "pendiente";
+    const titulo = this.getAttribute("titulo") || "Publicación";
+    const imagen = this.getAttribute("imagen") || "/imgs/default-product.svg";
+    const monto = parseFloat(this.getAttribute("monto")) || 0;
+    const fecha = this.getAttribute("fecha") || "";
+    const contraparteNombre =
+      this.getAttribute("contraparte-nombre") || "Usuario";
+    const contraparteFoto =
+      this.getAttribute("contraparte-foto") || "/imgs/default-avatar.svg";
+    const calificacion = this.getAttribute("calificacion") || "";
+    const esCompra = this.getAttribute("es-compra") === "true";
+
+    const montoFormateado = new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(monto);
+
+    const fechaFormateada = fecha
+      ? new Intl.DateTimeFormat("es-MX", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }).format(new Date(fecha))
+      : "";
+
+    const estadoClasses = {
+      pendiente: "badge-warning",
+      aceptada: "badge-info",
+      en_proceso: "badge-info",
+      completada: "badge-success",
+      cancelada: "badge-error",
+    };
+
+    const estadoLabels = {
+      pendiente: "Pendiente",
+      aceptada: "Aceptada",
+      en_proceso: "En proceso",
+      completada: "Completada",
+      cancelada: "Cancelada",
+    };
+
+    // Determinar acciones según estado y si es compra
+    let accionesHtml = "";
+    if (estado === "completada" && esCompra) {
+      if (!calificacion) {
+        accionesHtml = `<button class="btn btn-outline btn-sm" id="btnCalificar">⭐ Calificar</button>`;
+      } else {
+        accionesHtml = `<span class="badge badge-success">Calificado ⭐${calificacion}</span>`;
+      }
     }
 
-    static get observedAttributes() {
-        return ['trans-id', 'tipo', 'estado', 'titulo', 'imagen', 'monto', 'fecha', 
-                'contraparte-nombre', 'contraparte-foto', 'calificacion', 'es-compra'];
-    }
-
-    connectedCallback() {
-        this.render();
-    }
-
-    attributeChangedCallback() {
-        if (this.shadowRoot) {
-            this.render();
-        }
-    }
-
-    render() {
-        const id = this.getAttribute('trans-id') || '';
-        const estado = this.getAttribute('estado') || 'pendiente';
-        const titulo = this.getAttribute('titulo') || 'Publicación';
-        const imagen = this.getAttribute('imagen') || '/imgs/default-product.svg';
-        const monto = parseFloat(this.getAttribute('monto')) || 0;
-        const fecha = this.getAttribute('fecha') || '';
-        const contraparteNombre = this.getAttribute('contraparte-nombre') || 'Usuario';
-        const contraparteFoto = this.getAttribute('contraparte-foto') || '/imgs/default-avatar.svg';
-        const calificacion = this.getAttribute('calificacion') || '';
-        const esCompra = this.getAttribute('es-compra') === 'true';
-
-        const montoFormateado = new Intl.NumberFormat('es-MX', {
-            style: 'currency',
-            currency: 'MXN'
-        }).format(monto);
-
-        const fechaFormateada = fecha ? new Intl.DateTimeFormat('es-MX', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        }).format(new Date(fecha)) : '';
-
-        const estadoClasses = {
-            'pendiente': 'badge-warning',
-            'aceptada': 'badge-info',
-            'en_proceso': 'badge-info',
-            'completada': 'badge-success',
-            'cancelada': 'badge-error'
-        };
-
-        const estadoLabels = {
-            'pendiente': 'Pendiente',
-            'aceptada': 'Aceptada',
-            'en_proceso': 'En proceso',
-            'completada': 'Completada',
-            'cancelada': 'Cancelada'
-        };
-
-        // Determinar acciones según estado y si es compra
-        let accionesHtml = '';
-        if (estado === 'completada' && esCompra) {
-            if (!calificacion) {
-                accionesHtml = `<button class="btn btn-outline btn-sm" id="btnCalificar">⭐ Calificar</button>`;
-            } else {
-                accionesHtml = `<span class="badge badge-success">Calificado ⭐${calificacion}</span>`;
-            }
-        }
-
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
@@ -856,10 +987,14 @@ class TransaccionCard extends HTMLElement {
                     <div class="header">
                         <div class="info">
                             <div class="badges">
-                                <span class="badge ${esCompra ? 'badge-compra' : 'badge-venta'}">
-                                    ${esCompra ? 'Compra' : 'Venta'}
+                                <span class="badge ${
+                                  esCompra ? "badge-compra" : "badge-venta"
+                                }">
+                                    ${esCompra ? "Compra" : "Venta"}
                                 </span>
-                                <span class="badge ${estadoClasses[estado] || 'badge-info'}">
+                                <span class="badge ${
+                                  estadoClasses[estado] || "badge-info"
+                                }">
                                     ${estadoLabels[estado] || estado}
                                 </span>
                             </div>
@@ -871,7 +1006,9 @@ class TransaccionCard extends HTMLElement {
                     <div class="footer">
                         <img src="${contraparteFoto}" alt="" class="avatar" onerror="this.src='/imgs/default-avatar.svg'">
                         <div class="contraparte">
-                            <p class="contraparte-label">${esCompra ? 'Vendedor' : 'Comprador'}</p>
+                            <p class="contraparte-label">${
+                              esCompra ? "Vendedor" : "Comprador"
+                            }</p>
                             <p class="contraparte-nombre">${contraparteNombre}</p>
                         </div>
                         ${accionesHtml}
@@ -880,83 +1017,121 @@ class TransaccionCard extends HTMLElement {
             </div>
         `;
 
-        // Event listener para calificar
-        const btnCalificar = this.shadowRoot.getElementById('btnCalificar');
-        if (btnCalificar) {
-            btnCalificar.addEventListener('click', () => {
-                if (window.abrirModalCalificar) {
-                    window.abrirModalCalificar(id);
-                }
-            });
+    // Event listener para calificar
+    const btnCalificar = this.shadowRoot.getElementById("btnCalificar");
+    if (btnCalificar) {
+      btnCalificar.addEventListener("click", () => {
+        if (window.abrirModalCalificar) {
+          window.abrirModalCalificar(id);
         }
+      });
     }
+  }
 }
 
+/**
+ * @class RatingStars
+ * @extends HTMLElement
+ * @desc Componente para mostrar y seleccionar calificación con estrellas.
+ */
 class RatingStars extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        this._rating = 0;
+  /**
+   * @constructor
+   * @desc Inicializa shadow DOM y rating interno.
+   */
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._rating = 0;
+  }
+
+  /**
+   * @method observedAttributes
+   * @desc Devuelve atributos observables.
+   * @returns {Array<string>}
+   */
+  static get observedAttributes() {
+    return ["rating", "readonly", "size"];
+  }
+
+  /**
+   * @method rating (getter)
+   * @desc Obtiene la calificación actual.
+   * @returns {number}
+   */
+  get rating() {
+    return this._rating;
+  }
+
+  /**
+   * @method rating (setter)
+   * @desc Asigna nueva calificación y re-renderiza.
+   * @param {number} val
+   */
+  set rating(val) {
+    this._rating = parseInt(val) || 0;
+    this.render();
+  }
+
+  /**
+   * @method connectedCallback
+   * @desc Renderiza el componente y activa eventos si no es readonly.
+   */
+  connectedCallback() {
+    this._rating = parseInt(this.getAttribute("rating")) || 0;
+    this.render();
+    if (this.getAttribute("readonly") !== "true") {
+      this.setupEventListeners();
     }
+  }
 
-    static get observedAttributes() {
-        return ['rating', 'readonly', 'size'];
+  /**
+   * @method attributeChangedCallback
+   * @desc Re-renderiza cuando cambia un atributo.
+   */
+  attributeChangedCallback(name, oldVal, newVal) {
+    if (name === "rating") {
+      this._rating = parseInt(newVal) || 0;
     }
-
-    get rating() {
-        return this._rating;
+    if (this.shadowRoot) {
+      this.render();
     }
+  }
 
-    set rating(val) {
-        this._rating = parseInt(val) || 0;
-        this.render();
-    }
+  /**
+   * @method render
+   * @desc Construye la interfaz de estrellas.
+   */
+  render() {
+    const readonly = this.getAttribute("readonly") === "true";
+    const size = this.getAttribute("size") || "md";
 
-    connectedCallback() {
-        this._rating = parseInt(this.getAttribute('rating')) || 0;
-        this.render();
-        if (this.getAttribute('readonly') !== 'true') {
-            this.setupEventListeners();
-        }
-    }
+    const sizes = {
+      sm: "16px",
+      md: "24px",
+      lg: "32px",
+    };
 
-    attributeChangedCallback(name, oldVal, newVal) {
-        if (name === 'rating') {
-            this._rating = parseInt(newVal) || 0;
-        }
-        if (this.shadowRoot) {
-            this.render();
-        }
-    }
+    const starSize = sizes[size] || sizes.md;
 
-    render() {
-        const readonly = this.getAttribute('readonly') === 'true';
-        const size = this.getAttribute('size') || 'md';
-        
-        const sizes = {
-            sm: '16px',
-            md: '24px',
-            lg: '32px'
-        };
-
-        const starSize = sizes[size] || sizes.md;
-
-        let starsHtml = '';
-        for (let i = 1; i <= 5; i++) {
-            const filled = i <= this._rating;
-            starsHtml += `
-                <button class="star ${readonly ? 'readonly' : ''}" data-rating="${i}" ${readonly ? 'disabled' : ''}>
+    let starsHtml = "";
+    for (let i = 1; i <= 5; i++) {
+      const filled = i <= this._rating;
+      starsHtml += `
+                <button class="star ${
+                  readonly ? "readonly" : ""
+                }" data-rating="${i}" ${readonly ? "disabled" : ""}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" 
-                         fill="${filled ? 'currentColor' : 'none'}" 
+                         fill="${filled ? "currentColor" : "none"}" 
                          stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" 
                               d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                     </svg>
                 </button>
             `;
-        }
+    }
 
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: inline-flex;
@@ -1005,69 +1180,101 @@ class RatingStars extends HTMLElement {
             </div>
         `;
 
-        // Actualizar estrellas llenadas
-        const stars = this.shadowRoot.querySelectorAll('.star');
-        stars.forEach((star, index) => {
-            if (index < this._rating) {
-                star.classList.add('filled');
-                star.style.color = '#fbbf24';
-            }
-        });
-    }
+    // Actualizar estrellas llenadas
+    const stars = this.shadowRoot.querySelectorAll(".star");
+    stars.forEach((star, index) => {
+      if (index < this._rating) {
+        star.classList.add("filled");
+        star.style.color = "#fbbf24";
+      }
+    });
+  }
 
-    setupEventListeners() {
-        this.shadowRoot.addEventListener('click', (e) => {
-            const star = e.target.closest('.star');
-            if (star && !star.disabled) {
-                const rating = parseInt(star.dataset.rating);
-                this._rating = rating;
-                this.setAttribute('rating', rating);
-                this.render();
-                
-                // Emitir evento personalizado
-                this.dispatchEvent(new CustomEvent('rating-change', {
-                    detail: { rating },
-                    bubbles: true,
-                    composed: true
-                }));
-            }
-        });
-    }
+  /**
+   * @method setupEventListeners
+   * @desc Permite seleccionar estrellas y emite evento personalizado.
+   */
+  setupEventListeners() {
+    this.shadowRoot.addEventListener("click", (e) => {
+      const star = e.target.closest(".star");
+      if (star && !star.disabled) {
+        const rating = parseInt(star.dataset.rating);
+        this._rating = rating;
+        this.setAttribute("rating", rating);
+        this.render();
+
+        // Emitir evento personalizado
+        this.dispatchEvent(
+          new CustomEvent("rating-change", {
+            detail: { rating },
+            bubbles: true,
+            composed: true,
+          })
+        );
+      }
+    });
+  }
 }
 
+/**
+ * @class LoadingSpinner
+ * @extends HTMLElement
+ * @desc Spinner animado con texto opcional.
+ */
 class LoadingSpinner extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+  /**
+   * @constructor
+   * @desc Inicializa shadow DOM.
+   */
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  /**
+   * @method observedAttributes
+   * @desc Atributos observados para actualizaciones.
+   * @returns {Array<string>}
+   */
+  static get observedAttributes() {
+    return ["size", "text"];
+  }
+
+  /**
+   * @method connectedCallback
+   * @desc Renderiza el spinner al insertarse.
+   */
+  connectedCallback() {
+    this.render();
+  }
+
+  /**
+   * @method attributeChangedCallback
+   * @desc Actualiza spinner al cambiar atributos.
+   */
+  attributeChangedCallback() {
+    if (this.shadowRoot) {
+      this.render();
     }
+  }
 
-    static get observedAttributes() {
-        return ['size', 'text'];
-    }
+  /**
+   * @method render
+   * @desc Construye el spinner visual.
+   */
+  render() {
+    const size = this.getAttribute("size") || "md";
+    const text = this.getAttribute("text") || "";
 
-    connectedCallback() {
-        this.render();
-    }
+    const sizes = {
+      sm: "24px",
+      md: "40px",
+      lg: "60px",
+    };
 
-    attributeChangedCallback() {
-        if (this.shadowRoot) {
-            this.render();
-        }
-    }
+    const spinnerSize = sizes[size] || sizes.md;
 
-    render() {
-        const size = this.getAttribute('size') || 'md';
-        const text = this.getAttribute('text') || '';
-
-        const sizes = {
-            sm: '24px',
-            md: '40px',
-            lg: '60px'
-        };
-
-        const spinnerSize = sizes[size] || sizes.md;
-
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: flex;
@@ -1097,47 +1304,72 @@ class LoadingSpinner extends HTMLElement {
             </style>
 
             <div class="spinner"></div>
-            ${text ? `<span class="text">${text}</span>` : ''}
+            ${text ? `<span class="text">${text}</span>` : ""}
         `;
-    }
+  }
 }
 
+/**
+ * @class ToastNotification
+ * @extends HTMLElement
+ * @desc Componente visual de notificación tipo toast.
+ */
 class ToastNotification extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
+  /**
+   * @constructor
+   * @desc Inicializa shadow DOM.
+   */
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
 
-    static get observedAttributes() {
-        return ['type', 'message', 'duration'];
-    }
+  /**
+   * @method observedAttributes
+   * @desc Devuelve atributos observados.
+   * @returns {Array<string>}
+   */
+  static get observedAttributes() {
+    return ["type", "message", "duration"];
+  }
 
-    connectedCallback() {
-        this.render();
-        this.show();
-    }
+  /**
+   * @method connectedCallback
+   * @desc Renderiza y muestra la notificación.
+   */
+  connectedCallback() {
+    this.render();
+    this.show();
+  }
 
-    render() {
-        const type = this.getAttribute('type') || 'info';
-        const message = this.getAttribute('message') || '';
+  /**
+   * @method render
+   * @desc Construye la interfaz visual del toast.
+   */
+  render() {
+    const type = this.getAttribute("type") || "info";
+    const message = this.getAttribute("message") || "";
 
-        const colors = {
-            success: { bg: '#d1fae5', border: '#10b981', text: '#047857' },
-            error: { bg: '#fee2e2', border: '#ef4444', text: '#dc2626' },
-            warning: { bg: '#fef3c7', border: '#f59e0b', text: '#b45309' },
-            info: { bg: '#dbeafe', border: '#3b82f6', text: '#1d4ed8' }
-        };
+    const colors = {
+      success: { bg: "#d1fae5", border: "#10b981", text: "#047857" },
+      error: { bg: "#fee2e2", border: "#ef4444", text: "#dc2626" },
+      warning: { bg: "#fef3c7", border: "#f59e0b", text: "#b45309" },
+      info: { bg: "#dbeafe", border: "#3b82f6", text: "#1d4ed8" },
+    };
 
-        const color = colors[type] || colors.info;
+    const color = colors[type] || colors.info;
 
-        const icons = {
-            success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />',
-            error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />',
-            warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />',
-            info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
-        };
+    const icons = {
+      success:
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />',
+      error:
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />',
+      warning:
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />',
+      info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />',
+    };
 
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
@@ -1213,58 +1445,92 @@ class ToastNotification extends HTMLElement {
             </div>
         `;
 
-        const closeBtn = this.shadowRoot.getElementById('closeBtn');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => this.hide());
-        }
+    const closeBtn = this.shadowRoot.getElementById("closeBtn");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => this.hide());
     }
+  }
 
-    show() {
-        const toast = this.shadowRoot.getElementById('toast');
-        const duration = parseInt(this.getAttribute('duration')) || 4000;
+  /**
+   * @method show
+   * @desc Muestra el toast con animación.
+   */
+  show() {
+    const toast = this.shadowRoot.getElementById("toast");
+    const duration = parseInt(this.getAttribute("duration")) || 4000;
 
-        requestAnimationFrame(() => {
-            toast?.classList.add('show');
-        });
+    requestAnimationFrame(() => {
+      toast?.classList.add("show");
+    });
 
-        setTimeout(() => this.hide(), duration);
-    }
+    setTimeout(() => this.hide(), duration);
+  }
 
-    hide() {
-        const toast = this.shadowRoot.getElementById('toast');
-        toast?.classList.remove('show');
-        
-        setTimeout(() => this.remove(), 300);
-    }
+  /**
+   * @method hide
+   * @desc Oculta el toast y lo elimina.
+   */
+  hide() {
+    const toast = this.shadowRoot.getElementById("toast");
+    toast?.classList.remove("show");
+
+    setTimeout(() => this.remove(), 300);
+  }
 }
 
+/**
+ * @class EmptyState
+ * @extends HTMLElement
+ * @desc Componente visual para estados vacíos (sin datos).
+ */
 class EmptyState extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+  /**
+   * @constructor
+   * @desc Inicializa shadow DOM.
+   */
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  /**
+   * @method observedAttributes
+   * @desc Atributos observados.
+   * @returns {Array<string>}
+   */
+  static get observedAttributes() {
+    return ["icon", "title", "description", "action-text", "action-href"];
+  }
+
+  /**
+   * @method connectedCallback
+   * @desc Renderiza el componente al insertarse.
+   */
+  connectedCallback() {
+    this.render();
+  }
+
+  /**
+   * @method attributeChangedCallback
+   * @desc Actualiza la vista al cambiar atributos.
+   */
+  attributeChangedCallback() {
+    if (this.shadowRoot) {
+      this.render();
     }
+  }
 
-    static get observedAttributes() {
-        return ['icon', 'title', 'description', 'action-text', 'action-href'];
-    }
+  /**
+   * @method render
+   * @desc Construye la interfaz visual del estado vacío.
+   */
+  render() {
+    const title = this.getAttribute("title") || "Sin resultados";
+    const description = this.getAttribute("description") || "";
+    const actionText = this.getAttribute("action-text") || "";
+    const actionHref = this.getAttribute("action-href") || "";
 
-    connectedCallback() {
-        this.render();
-    }
-
-    attributeChangedCallback() {
-        if (this.shadowRoot) {
-            this.render();
-        }
-    }
-
-    render() {
-        const title = this.getAttribute('title') || 'Sin resultados';
-        const description = this.getAttribute('description') || '';
-        const actionText = this.getAttribute('action-text') || '';
-        const actionHref = this.getAttribute('action-href') || '';
-
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
@@ -1327,29 +1593,34 @@ class EmptyState extends HTMLElement {
                     </svg>
                 </div>
                 <h3 class="title">${title}</h3>
-                ${description ? `<p class="description">${description}</p>` : ''}
-                ${actionText && actionHref ? `<a href="${actionHref}" class="btn">${actionText}</a>` : ''}
+                ${
+                  description ? `<p class="description">${description}</p>` : ""
+                }
+                ${
+                  actionText && actionHref
+                    ? `<a href="${actionHref}" class="btn">${actionText}</a>`
+                    : ""
+                }
             </div>
         `;
-    }
+  }
 }
 
-customElements.define('navbar-component', NavbarComponent);
-customElements.define('publicacion-card', PublicacionCard);
-customElements.define('transaccion-card', TransaccionCard);
-customElements.define('rating-stars', RatingStars);
-customElements.define('loading-spinner', LoadingSpinner);
-customElements.define('toast-notification', ToastNotification);
-customElements.define('empty-state', EmptyState);
+customElements.define("navbar-component", NavbarComponent);
+customElements.define("publicacion-card", PublicacionCard);
+customElements.define("transaccion-card", TransaccionCard);
+customElements.define("rating-stars", RatingStars);
+customElements.define("loading-spinner", LoadingSpinner);
+customElements.define("toast-notification", ToastNotification);
+customElements.define("empty-state", EmptyState);
 
-// Función helper global para mostrar toasts usando el componente
-window.showComponentToast = function(message, type = 'info', duration = 4000) {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
+window.showComponentToast = function (message, type = "info", duration = 4000) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
 
-    const toast = document.createElement('toast-notification');
-    toast.setAttribute('type', type);
-    toast.setAttribute('message', message);
-    toast.setAttribute('duration', duration);
-    container.appendChild(toast);
+  const toast = document.createElement("toast-notification");
+  toast.setAttribute("type", type);
+  toast.setAttribute("message", message);
+  toast.setAttribute("duration", duration);
+  container.appendChild(toast);
 };
