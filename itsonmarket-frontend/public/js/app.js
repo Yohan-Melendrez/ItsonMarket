@@ -110,6 +110,7 @@ const AuthState = {
     this.user = user;
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
+    window.dispatchEvent(new Event("auth-changed"));
     updateNavbar();
   },
 
@@ -123,6 +124,7 @@ const AuthState = {
     this.user = null;
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    window.dispatchEvent(new Event("auth-changed"));
     updateNavbar();
     navigateTo("/");
   },

@@ -284,6 +284,10 @@ a:hover {
    NAVBAR
    ============================================ */
 
+navbar-component {
+    display: block;
+}
+
 .navbar {
     position: fixed;
     top: 0;
@@ -2568,6 +2572,10 @@ body.auth-page-active .main-content {
 /* ============================================
    PUBLICACION CARD STYLES
    ============================================ */
+
+publicacion-card {
+    display: block;
+}
 
 .publicacion-card {
     cursor: pointer;
